@@ -1,9 +1,13 @@
 import * as THREE from "three";
 import { Renderable, THREERenderable, Shared, BuildRenderable } from "../base.js";
 
-class behavior {
+class pBehavior {
     constructor(params) {
-        this.psys = undefined;
+        params = params || {};
+        if (params.enabled == undefined) {
+            params.enabled = true;
+        }
+        this.pSys = undefined;
         this.params = params;
     }
     onUpdate(pt, i, t) { }
@@ -11,7 +15,7 @@ class behavior {
     onEmit(pt, i) { }
 }
 
-class bmove extends behavior {
+class pMoveBehavior extends pBehavior {
     constructor(params) {
         super(params);
     }
@@ -28,17 +32,42 @@ class bmove extends behavior {
     }
 }
 
+class pRenderer {
+    constructor(params) {
+        params = params || {};
+        if (params.enabled == undefined) {
+            params.enabled = true;
+        }
+        this.pSys = undefined;
+        this.params = params;
+    }
+    onInit() { }
+    onRender() { }
+}
+
+class pPointsRenderer {
+    constructor(params) {
+        super(params);
+    }
+    onInit() { }
+    onRender() { }
+} 
+
+
 //pooled particles
-class psys {
-    constructor(size, bstack, render) {
+class pSys {
+    constructor(size, bstack, rstack) {
         console.log("Initializing particle pool - Size [" + size + "]");
         this.ps = [];
         this.available = [];
         this.bstack = bstack;
-        this.render = render;
+        this.rstack = rstack;
 
         for (var j = 0; j < this.bstack.length; j++) {
-            this.bstack[j].psys = this;
+            this.bstack[j].pSys = this;
+        }
+        for (var j = 0; j < this.rstack.length; j++) {
+            this.rstack[j].pSys = this;
         }
 
         for (var i = 0; i < size; i++) {
@@ -51,12 +80,14 @@ class psys {
                 bag: {},
                 _dead: true
             });
-
             for (var j = 0; j < this.bstack.length; j++) {
                 this.bstack[j].onInit(pt, i);
             }
-
             this.available.push(i);
+        }
+
+        for (var j = 0; j < this.rstack.length; j++) {
+            this.rstack[j].onInit();
         }
     }
 
@@ -89,7 +120,10 @@ class psys {
         }
     }
 
-    render(t) {
-
+    render() {
+        for (var j = 0; j < this.rstack.length; j++) {
+            if (!this.rstack[j].params.enabled) continue;
+            this.rstack[j].onRender();
+        }
     }
 }
