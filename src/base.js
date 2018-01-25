@@ -12,7 +12,7 @@ export class Renderable {
         this._render = _render;
     }
     addTo(parent) {
-        if (!(parent instanceof Base)) throw new Error('parent is not typed of Base');
+        if (!(parent instanceof Renderable)) throw new Error('type mismatch');
         if (parent === this) throw new Error('parent cannot be itself');
         if (this._parent) throw new Error('parent has been set');
         this._parent = parent;
@@ -54,7 +54,8 @@ export class THREERenderable extends Renderable {
     }
     addTo(parent) {
         super.addTo(parent);
-        this.group.add(parent.group);
+        parent.group.add(this.group);
+        console.log(parent);
     }
     destroy() {
         this.parent.group.remove(this.group);
@@ -63,6 +64,9 @@ export class THREERenderable extends Renderable {
     setEnabled(e) {
         super.setEnabled(e);
         this.group.visible = e;
+    }
+    build(construction) {
+        BuildRenderable(construction).addTo(this);
     }
 }
 
