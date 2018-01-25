@@ -5,13 +5,15 @@ var cv = document.getElementById('maincanvas');
 const W = 3240;
 const H = 960;
 
+
+
 function update() {
     requestAnimationFrame(update);
     //calculate size
+
     
 }
 
-update();
 
 onresize = function () {
     var w = window.innerWidth;
@@ -21,3 +23,4 @@ onresize = function () {
 }
 
 onresize();
+update();
