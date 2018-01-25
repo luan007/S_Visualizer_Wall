@@ -47,8 +47,8 @@ export class Renderable {
 }
 
 export class THREERenderable extends Renderable {
-    constructor() {
-        super();
+    constructor(_render) {
+        super(_render);
         this.group = new THREE.Group();
     }
     addTo(parent) {

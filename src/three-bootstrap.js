@@ -1,5 +1,7 @@
 import * as THREE from "three";
-import { THREERenderable } from "./base.js";
+import { Renderable, THREERenderable } from "./base.js";
+
+
 
 export function init() {
 
