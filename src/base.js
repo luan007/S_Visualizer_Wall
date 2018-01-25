@@ -1,3 +1,4 @@
+//structure
 import * as THREE from 'three';
 
 export class Renderable {
@@ -38,7 +39,7 @@ export class Renderable {
         }
         this.render(data);
     }
-    render(data) { 
+    render(data) {
         !!this._render ? this._render() : 0;
     }
     setEnabled(e) {
@@ -64,3 +65,22 @@ export class THREERenderable extends Renderable {
         this.group.visible = e;
     }
 }
+
+export function BuildRenderable(construction) {
+    var renderable = new THREERenderable();
+    var _render = construction(renderable.group, renderable);
+    renderable._render = _render;
+    return renderable;
+}
+
+
+//shared events
+import EventEmitter from "event-emitter";
+export var Events = new EventEmitter();
+
+
+//shared vars
+export var Shared = {
+    W: 3240,
+    H: 960
+};

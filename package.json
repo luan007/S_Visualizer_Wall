@@ -6,7 +6,9 @@
     "start": "webpack-dev-server --content-base build/ --port 3000"
   },
   "dependencies": {
+    "event-emitter": "^0.3.5",
     "glslify": "^6.1.0",
+    "gsap": "^1.20.3",
     "three": "^0.89.0",
     "vue": "^2.5.13"
   },

@@ -1,26 +1,11 @@
-import * as THREE from "three"
-
-var cv = document.getElementById('maincanvas');
-
-const W = 3240;
-const H = 960;
-
-
+import * as THREE from "three";
+import * as THREEBootstrap from "./three-bootstrap.js";
+import * as Base from "./base.js";
 
 function update() {
     requestAnimationFrame(update);
     //calculate size
-
-    
+    THREEBootstrap.update();
 }
 
-
-onresize = function () {
-    var w = window.innerWidth;
-    var h = w / W * H;
-    cv.style.width = w;
-    cv.style.height = h;
-}
-
-onresize();
 update();
