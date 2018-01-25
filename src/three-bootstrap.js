@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { Renderable, THREERenderable, Shared, BuildRenderable } from "./base.js";
+import { ParticleSystemDemo } from "./fx/particle-debug.js";
 
 var canvas = document.getElementById('maincanvas');
 
@@ -11,6 +12,9 @@ var renderer = new THREE.WebGLRenderer({
 
 renderer.setClearColor(new THREE.Color(0x000000), 1);
 renderer.setSize(Shared.W, Shared.H);
+renderer.gammaInput = true;
+renderer.gammaOutput = true;
+
 
 var camera = new THREE.PerspectiveCamera(
     60,
@@ -27,17 +31,18 @@ scene.fog = new THREE.Fog(0x000, 1, 1000);
 scene.add(root.group);
 // scene.add(ambientLight);
 
-root.build((group) => {
-    var geometry = new THREE.TetrahedronGeometry(5, 0);
-    var material = new THREE.MeshNormalMaterial();
-    var mesh = new THREE.Mesh(geometry, material);
-    group.add(mesh);
-    return (o) => {
-        mesh.rotateX(0.01);
-        mesh.rotateY(0.02);
-    }
-})
+// root.build((group) => {
+//     var geometry = new THREE.TetrahedronGeometry(5, 0);
+//     var material = new THREE.MeshNormalMaterial();
+//     var mesh = new THREE.Mesh(geometry, material);
+//     group.add(mesh);
+//     return (o) => {
+//         mesh.rotateX(0.01);
+//         mesh.rotateY(0.02);
+//     }
+// })
 
+ParticleSystemDemo.addTo(root);
 
 export function update(data) {
     root.update(data);

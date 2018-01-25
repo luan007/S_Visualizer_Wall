@@ -1,7 +1,4 @@
-import * as THREE from "three";
-import { Renderable, THREERenderable, Shared, BuildRenderable } from "../base.js";
-
-class pBehavior {
+export class pBehavior {
     constructor(params) {
         params = params || {};
         if (params.enabled == undefined) {
@@ -15,24 +12,7 @@ class pBehavior {
     onEmit(pt, i) { }
 }
 
-class pMoveBehavior extends pBehavior {
-    constructor(params) {
-        super(params);
-    }
-    onUpdate(pt, i, t) {
-        if (params.stage == "velocity") {
-            pt.v[0] += pt.a[0] * t;
-            pt.v[1] += pt.a[1] * t;
-            pt.v[2] += pt.a[2] * t;
-        } else if (params.stage == "position") {
-            pt.p[0] += pt.v[0] * t;
-            pt.p[1] += pt.v[1] * t;
-            pt.p[2] += pt.v[2] * t;
-        }
-    }
-}
-
-class pRenderer {
+export class pRenderer {
     constructor(params) {
         params = params || {};
         if (params.enabled == undefined) {
@@ -42,20 +22,11 @@ class pRenderer {
         this.params = params;
     }
     onInit() { }
-    onRender() { }
+    onRender(pSys) { }
 }
 
-class pPointsRenderer {
-    constructor(params) {
-        super(params);
-    }
-    onInit() { }
-    onRender() { }
-} 
-
-
 //pooled particles
-class pSys {
+export class pSys {
     constructor(size, bstack, rstack) {
         console.log("Initializing particle pool - Size [" + size + "]");
         this.ps = [];
@@ -75,13 +46,14 @@ class pSys {
                 p: [0, 0, 0],
                 v: [0, 0, 0],
                 a: [0, 0, 0],
-                c: [1, 1, 1, 1],
+                c: [1, 1, 1],
                 l: 0,
+                m: 1,
                 bag: {},
                 _dead: true
             });
             for (var j = 0; j < this.bstack.length; j++) {
-                this.bstack[j].onInit(pt, i);
+                this.bstack[j].onInit(this.ps[i], i);
             }
             this.available.push(i);
         }
@@ -89,6 +61,10 @@ class pSys {
         for (var j = 0; j < this.rstack.length; j++) {
             this.rstack[j].onInit();
         }
+    }
+
+    seek() {
+        return this.available.length;
     }
 
     emit(fn) {
@@ -99,20 +75,21 @@ class pSys {
         !!!fn || fn(elem);
         for (var j = 0; j < this.bstack.length; j++) {
             if (!this.bstack[j].params.enabled) continue;
-            this.bstack[j].onEmit(pt, i);
+            this.bstack[j].onEmit(elem, id);
         }
         return elem;
     }
 
     update(t) {
         for (var i = 0; i < this.ps.length; i++) {
-            var pt = this.ps[i];
+            let pt = this.ps[i];
             if (pt._dead) continue;
             pt.l -= t;
             if (pt.l <= 0) {
                 pt._dead = true;
                 this.available.push(i);
             }
+            pt.a[0] = pt.a[1] = pt.a[2] = 0;
             for (var j = 0; j < this.bstack.length; j++) {
                 if (!this.bstack[j].params.enabled) continue;
                 this.bstack[j].onUpdate(pt, i, t);
@@ -123,7 +100,7 @@ class pSys {
     render() {
         for (var j = 0; j < this.rstack.length; j++) {
             if (!this.rstack[j].params.enabled) continue;
-            this.rstack[j].onRender();
+            this.rstack[j].onRender(this);
         }
     }
 }
