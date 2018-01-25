@@ -32,7 +32,6 @@ root.build((group) => {
     var material = new THREE.MeshNormalMaterial();
     var mesh = new THREE.Mesh(geometry, material);
     group.add(mesh);
-
     return (o) => {
         mesh.rotateX(0.01);
         mesh.rotateY(0.02);

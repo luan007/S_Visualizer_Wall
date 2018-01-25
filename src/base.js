@@ -19,6 +19,10 @@ export class Renderable {
         this._parent.children.push(this);
         // this._parent.group.add(this.group);
     }
+    add(obj) {
+        obj.addTo(this);
+        return this;
+    }
     destroy() {
         // if (!this._parent) throw new Error('instance only when has parent can use destroy');
         this._markRemoval = true;
@@ -67,6 +71,7 @@ export class THREERenderable extends Renderable {
     }
     build(construction) {
         BuildRenderable(construction).addTo(this);
+        return this;
     }
 }
 
