@@ -10,25 +10,37 @@ var renderer = new THREE.WebGLRenderer({
     canvas: canvas
 });
 
-renderer.setClearColor(new THREE.Color(0x000000), 1);
+renderer.setClearColor(new THREE.Color(0x211D1D), 1);
 renderer.setSize(Shared.W, Shared.H);
 renderer.gammaInput = true;
 renderer.gammaOutput = true;
 
 
 var camera = new THREE.PerspectiveCamera(
-    60,
+    20,
     Shared.W / Shared.H,
     0.1,
-    1000
+    5000
 );
-camera.position.z = 50;
+camera.position.z = 500;
+Shared.camera = camera;
 
 var root = new THREERenderable();
 // var ambientLight = new THREE.AmbientLight(0xffff00);
 var scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0x000, 1, 1000);
 scene.add(root.group);
+
+
+var light = new THREE.DirectionalLight(new THREE.Color(1, 1, 1), 10.1);
+scene.add(light);
+
+var light2 = new THREE.PointLight(new THREE.Color(1, 1, 1), 10, 100);
+light2.translateY(-90);
+light2.translateZ(-30);
+scene.add(light2);
+
+
 // scene.add(ambientLight);
 
 // root.build((group) => {
@@ -54,6 +66,8 @@ onresize = function () {
     var h = w / Shared.W * Shared.H;
     canvas.style.width = w;
     canvas.style.height = h;
+    Shared.w = w;
+    Shared.h = h;
 }
 
 onresize();

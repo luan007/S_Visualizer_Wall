@@ -1,6 +1,7 @@
 import { pMoveBehavior, pPointsRenderer } from "./particle-modules.js";
 import { pSys, pBehavior } from "./particles.js";
 import { THREERenderable, BuildRenderable } from "../base.js";
+import * as THREE from "three";
 import { Shared } from "../base.js";
 import * as glmat from "gl-matrix";
 import "./perlin.js";
@@ -119,7 +120,6 @@ class pBlinkBehavior extends pBehavior {
 
 export var Scene = new THREERenderable();
 
-
 var MainSystem = BuildRenderable((group) => {
     var velocity = new pMoveBehavior({ enabled: true, stage: "velocity" });
     var position = new pMoveBehavior({ enabled: true, stage: "position" });
@@ -170,9 +170,9 @@ var SecondarySystem = BuildRenderable((group) => {
         [
             render
         ]);
-    
+
     render.material.sizeAttenuation = true;
-    render.material.size = 0.3;
+    render.material.size = 0.8;
     group.add(render.mesh);
     return () => {
         for (var i = 0; i < 50000 && i < sys.seek(); i++) {
@@ -180,7 +180,7 @@ var SecondarySystem = BuildRenderable((group) => {
                 pt.l = Infinity;
                 pt.p = [0, 0, 0];
                 pt.c = [0.5, 0.5, 0.5];
-                pt.v = [2 * (Math.random() - 0.5), 2 * (Math.random() - 0.5), 2 * (Math.random() - 0.5)];
+                pt.v = [2 * (Math.random() - 0.5), 2 * (Math.random() - 0.5), 15 * (Math.random())];
             });
         }
         sys.update(1);
@@ -188,3 +188,133 @@ var SecondarySystem = BuildRenderable((group) => {
     };
 }).addTo(Scene);
 
+var cube = THREE.ImageUtils.loadTextureCube([
+    '/assets/Env/space/px.png',
+    '/assets/Env/space/nx.png',
+    '/assets/Env/space/py.png',
+    '/assets/Env/space/ny.png',
+    '/assets/Env/space/pz.png',
+    '/assets/Env/space/nz.png',
+], THREE.CubeReflectionMapping);
+
+
+var _tmp_Crystal = (group) => {
+
+    var morph = [];
+
+    var local = new THREE.Group();
+    group.add(local);
+    var seed = Math.random() * 150;
+    var geometry = new THREE.TetrahedronGeometry(7, 2);
+    var material = new THREE.MeshPhysicalMaterial({
+        // transparent: true,
+        side: THREE.DoubleSide,
+        color: new THREE.Color(1, 0.1, 0.01),
+        reflectivity: 1,
+        refractionRatio: 0,
+        shading: THREE.FlatShading,
+        roughness: 0.5,
+        // roughnessMap: THREE.ImageUtils.loadTexture("/assets/Textures/bricks1.png"),
+        metalness: 1,
+        // metalnessMap: THREE.ImageUtils.loadTexture("/assets/Textures/bricks1.png"),
+        emissiveMap: THREE.ImageUtils.loadTexture("/assets/Textures/crystal1.png"),
+        emissive: new THREE.Color(0.1, 0.3, 1),
+        emissiveIntensity: 1,
+        // blending: THREE.AdditiveBlending,
+        // refractionRatio: 0.8,
+        // clearCoatRoughness: 0,
+        // clearCoat: 1,
+        envMap: cube,
+        envMapIntensity: 1,
+        clearCoatRoughness: 0,
+        clearCoat: 1
+        // opacity: 0.8
+        // opacity: 0.5
+    });
+
+    var mesh = new THREE.Mesh(geometry, material);
+    local.add(mesh);
+
+    morph.push(geometry);
+
+    for (var i = 0; i < 8; i += 3) {
+        var wfGeometry = geometry.clone();
+        var wfMaterial = new THREE.MeshBasicMaterial({
+            transparent: true,
+            side: THREE.DoubleSide,
+            wireframe: true,
+            color: new THREE.Color(1.0, 0.5, 0.1),
+            opacity: 1,
+            blending: THREE.AdditiveBlending
+        });
+        var wf = new THREE.Mesh(wfGeometry, wfMaterial);
+        local.add(wf);
+        morph.push(wfGeometry);
+    }
+
+    // var disk = new THREE.RingGeometry(12, 18, 50, 50);
+    // var diskMat = new THREE.MeshBasicMaterial({
+    //     transparent: true,
+    //     opacity: 0.1,
+    //     blending: THREE.AdditiveBlending,
+    //     // wireframe: true,
+    //     color: new THREE.Color(1.0, 1.0, 1.0)
+    // });
+    // var diskMesh = new THREE.Mesh(disk, diskMat);
+
+
+    // group.add(diskMesh);
+
+    group.translateX(290 * (Math.random() - 0.5));
+    group.translateY(50 * (Math.random() - 0.5));
+    group.translateZ(300 - Math.random() * 300);
+
+
+    var domElement = $(`
+        <div style='position: fixed; top: 0; left: 0; text-align: right;'>
+            <div style='font-family: "DIN"; font-weight: 600; font-size: 2vw; color: white'>319,381,382</div>
+            <div style='font-family: "PingFang SC"; font-weight: 500; opacity: 0.4; font-size: 1.2vw; color: white'>分享次数</div>
+        </div>
+    `).appendTo(document.body);
+
+    return (t) => {
+
+        for (var i = 0; i < geometry.vertices.length; i++) {
+            let q = Math.floor(noise.perlin3(i / 3, seed, Shared.t * 2) * 3) / 3;
+
+            var norm = geometry.vertices[i].normalize();
+            var n = norm.clone();
+            norm.multiplyScalar(q * 5 + 10);
+            // geometry.vertices[i].normalize().multiplyScalar(q * 5 + 10);
+            var c = n.clone().multiplyScalar(q * 6 + 10);
+            var s = n.clone().multiplyScalar((Math.random() - 0.5) * 1);
+
+            for(var j = 1; j < morph.length; j++) {
+                morph[j].vertices[i].x = norm.x;
+                morph[j].vertices[i].y = norm.y;
+                morph[j].vertices[i].z = norm.z;
+            }
+        }
+        geometry.verticesNeedUpdate = true;
+
+        for(var j = 1; j < morph.length; j++) {
+            morph[j].verticesNeedUpdate = true;
+        }
+
+        local.rotateX(0.01);
+        local.rotateY(0.01);
+
+
+        var vector = group.position.clone().project(Shared.camera);
+        vector.x = (vector.x + 1) / 2 * Shared.w;
+        vector.y = -(vector.y - 1) / 2 * Shared.h;
+
+        domElement.css("transform", `translate(${vector.x}px, ${vector.y}px)`);
+
+    };
+};
+
+BuildRenderable(_tmp_Crystal).addTo(Scene);
+// BuildRenderable(_tmp_Crystal).addTo(Scene);
+// BuildRenderable(_tmp_Crystal).addTo(Scene);
+// BuildRenderable(_tmp_Crystal).addTo(Scene);
