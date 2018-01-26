@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { Renderable, THREERenderable, Shared, BuildRenderable } from "./base.js";
-import { ParticleSystemDemo } from "./fx/particle-debug.js";
+import * as ParticleDebug from "./fx/particle-debug.js";
 
 var canvas = document.getElementById('maincanvas');
 
@@ -42,7 +42,7 @@ scene.add(root.group);
 //     }
 // })
 
-ParticleSystemDemo.addTo(root);
+ParticleDebug.Scene.addTo(root);
 
 export function update(data) {
     root.update(data);

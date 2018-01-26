@@ -91,5 +91,10 @@ export var Events = new EventEmitter();
 //shared vars
 export var Shared = {
     W: 3240,
-    H: 960
+    H: 960,
+    t: 0
 };
+
+export function update() {
+    Shared.t += 0.01;
+}

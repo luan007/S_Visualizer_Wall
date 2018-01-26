@@ -5,6 +5,7 @@ import * as Base from "./base.js";
 function update() {
     requestAnimationFrame(update);
     //calculate size
+    Base.update();
     THREEBootstrap.update();
 }
 

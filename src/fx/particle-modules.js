@@ -30,13 +30,17 @@ export class pPointsRenderer extends pRenderer {
         this.positions = new Float32Array(params.size * 3);
         this.colors = new Float32Array(params.size * 3);
 
+        var texture = new THREE.ImageUtils.loadTexture( "../assets/Dot.png" );
         this.material = new THREE.PointsMaterial({
             vertexColors: true,
-            size: 1,
+            size: 3,
             transparent: true,
-            sizeAttenuation: true,
-            // depthTest: false,
-            // blending: THREE.AdditiveBlending
+            // opacity: 1,
+            // alphaTest: 0.5,
+            sizeAttenuation: false,
+            map: texture,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
         });
         for (var i = 0; i < params.size; i++) {
             verticies.push(new THREE.Vector3(0, 0, 0));
