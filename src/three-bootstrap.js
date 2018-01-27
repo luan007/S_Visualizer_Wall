@@ -19,16 +19,16 @@ renderer.gammaOutput = true;
 var camera = new THREE.PerspectiveCamera(
     20,
     Shared.W / Shared.H,
-    0.1,
+    1,
     5000
 );
-camera.position.z = 500;
+camera.position.z = 1000;
 Shared.camera = camera;
 
 var root = new THREERenderable();
 // var ambientLight = new THREE.AmbientLight(0xffff00);
 var scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0x000, 1, 1000);
+scene.fog = new THREE.Fog(0x000, 1, 1500);
 scene.add(root.group);
 
 
@@ -57,6 +57,7 @@ scene.add(light2);
 ParticleDebug.Scene.addTo(root);
 
 export function update(data) {
+    camera.position.z += (500 - camera.position.z) * 0.02;
     root.update(data);
     renderer.render(scene, camera);
 }

@@ -1,4 +1,4 @@
-import { pMoveBehavior, pPointsRenderer, pLinesRenderer } from "./particle-modules.js";
+import { pMoveBehavior, pPointsRenderer, pLinesRenderer, pDragLineRenderer } from "./particle-modules.js";
 import { pSys, pBehavior } from "./particles.js";
 import { THREERenderable, BuildRenderable } from "../base.js";
 import * as THREE from "three";
@@ -89,6 +89,7 @@ class pTargetBehavior extends pBehavior {
         pt.c[0] += (pt.bag.targetColor[0] - pt.c[0]) * this.params.powerColor;
         pt.c[1] += (pt.bag.targetColor[1] - pt.c[1]) * this.params.powerColor;
         pt.c[2] += (pt.bag.targetColor[2] - pt.c[2]) * this.params.powerColor;
+
     }
 }
 
@@ -106,9 +107,16 @@ class pNoiseBehavior extends pBehavior {
             pt.p[2]
         ];
         // pt.v[0] += noise.perlin3(pt.bag.seed[0] * 10, pt.bag.seed[1] / 10, Shared.t) * .3;
-        pt.v[1] += noise.perlin3(pt.bag.seed[1] * 10, pt.bag.seed[2] / 10, Shared.t) * this.params.power;
+        var z = noise.perlin3(pt.bag.seed[2] / 100, pt.bag.seed[0] / 100, pt.bag.seed[1] / 100 + Shared.t / 15);
+        pt.p[2] = pt.bag.seed[2] + z * this.params.power * 1;
         // pt.v[2] += noise.perlin3(pt.bag.seed[2] * 10, pt.bag.seed[0] / 10, Shared.t) * .3;
-        // pt.a[1] = Math.sin(pt.p[0] / 50 + Shared.t * 3);
+        // pt.v[1] = Math.sin(-pt.p[2] / 30 + Shared.t) * this.params.power * 3 + Math.sin(-pt.p[0] / 30 + Shared.t * 2) * this.params.power * 2;
+        pt.p[1] = pt.bag.seed[1] + noise.perlin3(pt.bag.seed[1] / 50, pt.bag.seed[0] / 100 + Shared.t / 2.5, pt.bag.seed[2] / 100 - Shared.t / 3) * this.params.power;
+
+        pt.c[2] = (z + 1.0) / 2;
+        pt.c[0] = pt.c[1] = 1;
+
+
     }
 }
 
@@ -132,8 +140,8 @@ class pBlinkBehavior extends pBehavior {
     }
 
     onUpdate(pt, i, t) {
-        var a = Math.sin((i / 100 + Shared.t * 10)) * 0.2;
-        pt.c[0] = pt.c[1] = pt.c[2] = a;
+        var a = Math.sin((i / 100 + Shared.t * 10));
+        pt.c[0] = pt.c[1] = pt.c[2] = a * a * 0.8;
     }
 }
 
@@ -159,29 +167,31 @@ class pFadeBehavior extends pBehavior {
 class pGravityBehavior extends pBehavior {
     constructor(params) {
         super(params);
-        this.point = [0, 0, 0];
-        this.g = 100.0;
-        this.clamp = 0.05;
+        params.point = params.point || [0, 0, 0];
+        params.g = params.g || 100.0;
+        params.clamp = params.clamp || 0.05;
     }
     onUpdate(pt, i, t) {
-        glmat.vec3.sub(pt.a, pt.p, this.point);
+        glmat.vec3.sub(pt.a, pt.p, pt.bag.attractor || this.params.point);
         var rd = 1 / Math.max(0.01, glmat.vec3.squaredLength(pt.a));
         pt.a = glmat.vec3.scale(pt.a,
             glmat.vec3.normalize(pt.a, pt.a),
-            -Math.min(this.g * rd, this.clamp)
+            -Math.min(this.params.g * rd, this.params.clamp)
         );
     }
 }
 
 export var Scene = new THREERenderable();
+var target = new pTargetBehavior({ enabled: true, power: 0.1, powerColor: 0.1, clamp: 0.2 });
+target.generateDemoTarget("北京721双闪车队");
+
 
 var MainSystem = BuildRenderable((group) => {
     var velocity = new pMoveBehavior({ enabled: true, stage: "velocity" });
     var position = new pMoveBehavior({ enabled: true, stage: "position" });
     var damp = new pDampingBehavior({ enabled: true, power: 0.99 });
-    var target = new pTargetBehavior({ enabled: true, power: 0.1, powerColor: 0.1, clamp: 0.2 });
-    target.generateDemoTarget("北京721双闪车队");
     var render = new pPointsRenderer({ size: 20000, enabled: true });
+    render.material.size = 4;
     var sys = new pSys(20000,
         [
             target,
@@ -214,9 +224,9 @@ var SecondarySystem = BuildRenderable((group) => {
     var blink = new pBlinkBehavior({ enabled: true });
     // var target = new pTargetBehavior({ enabled: true, power: 0.1, powerColor: 0.1, clamp: 0.2 });
     // target.generateDemoTarget("北京721双闪车队");
-    var render = new pPointsRenderer({ size: 8000, enabled: true });
-    var linerender = new pLinesRenderer({ size: 8000, enabled: true });
-    var sys = new pSys(8000,
+    var render = new pPointsRenderer({ size: 18000, enabled: true });
+    render.material.map = THREE.ImageUtils.loadTexture("./assets/Dot.png");
+    var sys = new pSys(18000,
         [
             velocity,
             damp,
@@ -228,61 +238,16 @@ var SecondarySystem = BuildRenderable((group) => {
             // linerender
         ]);
 
-    for (var i = 0; i < 18000 && i < sys.seek(); i++) {
-        sys.emit((pt) => {
-            pt.l = Infinity;
-            pt.p = [0, 0, 0];
-            pt.c = [0.5, 0.5, 0.5];
-            pt.v = [4 * (Math.random() - 0.5), 4 * (Math.random() - 0.5), 15 * (Math.random() - 0.3)];
-        });
-    }
-    render.material.sizeAttenuation = true;
-    render.material.size = 0.8;
-    group.add(render.mesh);
-    group.add(linerender.mesh);
-    return () => {
-        sys.update(1);
-        sys.render();
-    };
-}).addTo(Scene);
-
-var FloatSystem = BuildRenderable((group) => {
-    var velocity = new pMoveBehavior({ enabled: true, stage: "velocity" });
-    var position = new pMoveBehavior({ enabled: true, stage: "position" });
-    var damp = new pDampingBehavior({ enabled: true, power: 0.97 });
-    var blink = new pBlinkBehavior({ enabled: true });
-    var noise = new pNoiseBehavior({ enabled: true, power: 0.001 });
-    var fade = new pFadeBehavior({ enabled: true, speed: 0.04 });
-    // var target = new pTargetBehavior({ enabled: true, power: 0.1, powerColor: 0.1, clamp: 0.2 });
-    // target.generateDemoTarget("北京721双闪车队");
-    var render = new pPointsRenderer({ size: 230, enabled: true });
-    var lines = new pLinesRenderer({ size: 700, enabled: true, distSq: 50, maxPerNode: 5 });
-    var sys = new pSys(230,
-        [
-            noise,
-            velocity,
-            damp,
-            position,
-            fade
-        ],
-        [
-            render,
-            lines
-        ]);
-
-    render.material.sizeAttenuation = true;
+    render.material.sizeAttenuation = false;
     render.material.size = 4;
-    render.material.map = THREE.ImageUtils.loadTexture("/assets/DotFlat.png");
     group.add(render.mesh);
-    group.add(lines.mesh);
     return () => {
-        for (var i = 0; i < 1; i++) {
+        for (var i = 0; i < 4000 && i < sys.seek(); i++) {
             sys.emit((pt) => {
                 pt.l = Infinity;
-                pt.alpha = 0;
-                pt.p = [(Math.random() - 0.5) * 150, -10, 440 - Math.random() * 80];
-                pt.c = [1, 1, 1];
-                pt.v = [0, (Math.random() + .1) * 0.3, 0];
+                pt.p = [0, 0, 500];
+                pt.c = [0.2, 0.2, 0.2];
+                pt.v = [4 * (Math.random() - 0.5), 4 * (Math.random() - 0.5), 5 * (Math.random() - 0.3)];
             });
         }
 
@@ -291,52 +256,99 @@ var FloatSystem = BuildRenderable((group) => {
     };
 }).addTo(Scene);
 
-var WaveSystem = BuildRenderable((group) => {
+var FloatSystem = BuildRenderable((group) => {
     var velocity = new pMoveBehavior({ enabled: true, stage: "velocity" });
-    var noise = new pNoiseBehavior({ enabled: true });
-    var damp = new pDampingBehavior({ enabled: true, power: 0.3 });
     var position = new pMoveBehavior({ enabled: true, stage: "position" });
-    var gravity = new pGravityBehavior({ enabled: true });
-    var fade = new pFadeBehavior({ enabled: true, speed: 0.01 });
-    var render = new pPointsRenderer({ size: 15000, enabled: true });
-    var sys = new pSys(15000,
+    var damp = new pDampingBehavior({ enabled: true, power: 0.99 });
+    var blink = new pBlinkBehavior({ enabled: true });
+    var noise = new pNoiseBehavior({ enabled: true, power: 0.001 });
+    var fade = new pFadeBehavior({ enabled: true, speed: 0.04 });
+    // var target = new pTargetBehavior({ enabled: true, power: 0.1, powerColor: 0.1, clamp: 0.2 });
+    // target.generateDemoTarget("北京721双闪车队");
+    var render = new pPointsRenderer({ size: 430, enabled: true });
+    var lines = new pDragLineRenderer({ size: 430, enabled: true });
+    var sys = new pSys(430,
         [
             // noise,
-            gravity,
             velocity,
-            // damp,
+            damp,
             position,
             fade
+        ],
+        [
+            render,
+            // lines
+        ]);
+
+    render.material.sizeAttenuation = true;
+    render.material.size = 2.5;
+    render.material.map = THREE.ImageUtils.loadTexture("/assets/hash_l.png");
+    group.add(render.mesh);
+    // group.add(lines.mesh);
+    return () => {
+
+        if (Shared.t > 1.2) {
+            for (var i = 0; i < 30; i++) {
+                sys.emit((pt) => {
+                    pt.l = Infinity;
+                    pt.alpha = 0;
+                    pt.p = [(Math.random() - 0.5) * 150, -30, 350 + Math.random() * 100];
+                    pt.c = [Math.random() * 0.3 + 0.7, 0.5 * Math.random(), 0, 2];
+                    pt.v = [0, (Math.random() + .1) * 0.3, 0];
+                });
+            }
+        }
+        sys.update(1);
+        sys.render();
+    };
+})//.addTo(Scene);
+
+var WaveSystem = BuildRenderable((group) => {
+    var velocity = new pMoveBehavior({ enabled: true, stage: "velocity" });
+    var noise = new pNoiseBehavior({ enabled: true, power: 15 });
+    var damp = new pDampingBehavior({ enabled: true, power: 0.4 });
+    var position = new pMoveBehavior({ enabled: true, stage: "position" });
+    var gravity = new pGravityBehavior({ enabled: true });
+    var blink = new pBlinkBehavior({ enabled: true });
+    var fade = new pFadeBehavior({ enabled: true, speed: 0.01 });
+    var render = new pPointsRenderer({ size: 30000, enabled: true });
+    var sys = new pSys(30000,
+        [
+            // gravity,
+            velocity,
+            damp,
+            noise,
+            position,
+            fade,
+            // blink
         ],
         [
             render
         ]);
 
-    for (var i = 0; i < 15000 && i < sys.seek(); i++) {
+    for (var i = 0; i < 30000 && i < sys.seek(); i++) {
         sys.emit((pt) => {
             pt.l = Infinity;
             let deg = Math.random() * Math.PI * 2;
             let r = Math.random();
 
             //pt.p = [(Math.random() - 0.5) * 200, -50, Math.random() * 400];
-            // pt.p = [Math.sin(deg) * r * 300, -40 + (Math.random() * 10 - 5) * Math.cos(r * Math.PI), Math.cos(deg) * r * 300 + 200];
-            pt.p = [Math.sin(deg) * r * 300, -40 + (Math.random() * 10 - 5) * Math.cos(r * Math.PI), Math.cos(deg) * r * 300 + 200];
-            pt.c = [0.3, 0.3, 0.3];
-            // pt.v = [0, 0, 0];
+            // pt.p = [Math.sin(deg) * r * 300, -40 + (Math.random() * 20 - 5) * Math.cos(r * Math.PI), Math.cos(deg) * r * 300 + 200];
+            pt.p = [Math.sin(deg) * r * 300, -45, Math.cos(deg) * r * 370];
+            pt.c = [0.1, 0.1, 0.1];
             pt.v = [0, 0, 0];
             pt.alpha = 0;
         });
     }
     render.material.sizeAttenuation = true;
-    render.material.size = 10;
-    render.material.map = THREE.ImageUtils.loadTexture("/assets/DotFlat.png");
+    render.material.size = 2;
+    render.material.map = THREE.ImageUtils.loadTexture("/assets/Dot.png");
     group.add(render.mesh);
     return () => {
         sys.update(1);
         sys.render();
     };
 }).addTo(Scene);
-
 
 
 
@@ -357,11 +369,11 @@ var _tmp_Crystal = (group) => {
     var local = new THREE.Group();
     group.add(local);
     var seed = Math.random() * 150;
-    var geometry = new THREE.TetrahedronGeometry(7, 2);
+    var geometry = new THREE.TetrahedronGeometry(3, 2);
     var material = new THREE.MeshPhysicalMaterial({
         // transparent: true,
         side: THREE.DoubleSide,
-        color: new THREE.Color(1, 0.1, 0.01),
+        color: new THREE.Color(0, 0, 0),
         reflectivity: 1,
         refractionRatio: 0,
         shading: THREE.FlatShading,
@@ -369,9 +381,9 @@ var _tmp_Crystal = (group) => {
         // roughnessMap: THREE.ImageUtils.loadTexture("/assets/Textures/bricks1.png"),
         metalness: 1,
         // metalnessMap: THREE.ImageUtils.loadTexture("/assets/Textures/bricks1.png"),
-        emissiveMap: THREE.ImageUtils.loadTexture("/assets/Textures/crystal1.png"),
-        emissive: new THREE.Color(0.1, 0.3, 1),
-        emissiveIntensity: 1,
+        // emissiveMap: THREE.ImageUtils.loadTexture("/assets/Textures/crystal1.png"),
+        // emissive: new THREE.Color(0.1, 0.3, 1),
+        // emissiveIntensity: 1,
         // blending: THREE.AdditiveBlending,
         // refractionRatio: 0.8,
         // clearCoatRoughness: 0,
@@ -404,7 +416,7 @@ var _tmp_Crystal = (group) => {
         morph.push(wfGeometry);
     }
 
-    var disk = new THREE.RingGeometry(18.2, 19, 50, 50);
+    var disk = new THREE.RingGeometry(12.2, 13, 50, 50);
     var diskMat = new THREE.MeshBasicMaterial({
         transparent: true,
         opacity: 1,
@@ -426,20 +438,62 @@ var _tmp_Crystal = (group) => {
         </div>
     `).appendTo(document.body);
 
+
+
+    // var CrystalSystem = BuildRenderable((_g) => {
+    //     var velocity = new pMoveBehavior({ enabled: true, stage: "velocity" });
+    //     var damp = new pDampingBehavior({ enabled: true, power: 0.9 });
+    //     var position = new pMoveBehavior({ enabled: true, stage: "position" });
+    //     var gravity = new pGravityBehavior({ enabled: true, g: 100000, clamp: 0.05 });
+    //     var noise = new pNoiseBehavior({ enabled: true, power: 1 });
+    //     var render = new pPointsRenderer({ size: 3000, enabled: true });
+    //     var sys = new pSys(3000,
+    //         [
+    //             //noise,
+    //             gravity,
+    //             velocity,
+    //             // damp,
+    //             position,
+    //         ],
+    //         [
+    //             render
+    //         ]);
+
+    //     render.material.sizeAttenuation = true;
+    //     render.material.size = 5;
+    //     render.material.map = THREE.ImageUtils.loadTexture("/assets/Dot.png");
+    //     _g.add(render.mesh);
+    //     return () => {
+    //         for (var i = 0; i < 100 && i < sys.seek(); i++) {
+    //             sys.emit((pt) => {
+    //                 pt.l = 100;
+    //                 pt.p = [group.position.x, group.position.y, group.position.z];
+    //                 pt.c = [1.0, 0, 0];
+    //                 pt.v = [0, 0, 0];
+    //                 pt.alpha = 1;
+    //                 pt.bag.attractor = target.target[Math.floor(Math.random() * target.target.length)];
+    //             });
+    //         }
+    //         sys.update(1);
+    //         sys.render();
+    //     };
+    // }).addTo(Scene);
+
+
     return (t) => {
         for (var i = 0; i < geometry.vertices.length; i++) {
             let q = Math.floor(noise.perlin3(i / 3, seed, Shared.t * 2) * 3) / 3;
             var norm = geometry.vertices[i].normalize();
             var n = norm.clone();
-            norm.multiplyScalar(q * 5 + 10);
+            norm.multiplyScalar(q * 2 + 5);
             // geometry.vertices[i].normalize().multiplyScalar(q * 5 + 10);
             var c = n.clone().multiplyScalar(q * 6 + 10);
             var s = n.clone().multiplyScalar((Math.random() - 0.5) * 1);
 
             for (var j = 1; j < morph.length; j++) {
-                morph[j].vertices[i].x = norm.x;
-                morph[j].vertices[i].y = norm.y;
-                morph[j].vertices[i].z = norm.z;
+                morph[j].vertices[i].x = norm.x * 1.5;
+                morph[j].vertices[i].y = norm.y * 1.5;
+                morph[j].vertices[i].z = norm.z * 1.5;
             }
         }
         geometry.verticesNeedUpdate = true;
@@ -461,7 +515,52 @@ var _tmp_Crystal = (group) => {
     };
 };
 
+
+var _tmp_Objs = (group) => {
+
+    var all = [];
+    var local = new THREE.Group();
+    group.add(local);
+    var seed = Math.random() * 150;
+    var material = new THREE.MeshPhysicalMaterial({
+        // transparent: true,
+        side: THREE.DoubleSide,
+        color: new THREE.Color(1.0, 0.5, 0),
+        reflectivity: 1,
+        shading: THREE.FlatShading,
+        roughness: 0,
+        metalness: 1,
+        envMap: cube,
+        envMapIntensity: 1,
+        // emissive: new THREE.Color(0.01, 0.01, 0.01)
+
+    });
+    for (var i = 0; i < 150; i++) {
+        var geometry = new THREE.TetrahedronGeometry(3, 1);
+        var mesh = new THREE.Mesh(geometry, material);
+        all.push(mesh)
+
+        mesh.translateX((Math.random() - 0.5) * 1455);
+        mesh.translateY((Math.random() - 0.5) * 1455);
+        mesh.translateZ((Math.random() - 0.5) * 500 - 400);
+        local.add(mesh);
+    }
+
+
+    return (t) => {
+        for (var i = 0; i < all.length; i++) {
+            all[i].geometry.rotateX(0.01);
+            all[i].geometry.rotateY(0.005);
+        }
+    };
+};
+
+
+// BuildRenderable(_tmp_Objs).addTo(Scene);
+BuildRenderable(_tmp_Crystal).addTo(Scene);
+BuildRenderable(_tmp_Crystal).addTo(Scene);
 // BuildRenderable(_tmp_Crystal).addTo(Scene);
-// BuildRenderable(_tmp_Crystal).addTo(Scene);
-// BuildRenderable(_tmp_Crystal).addTo(Scene);
-// BuildRenderable(_tmp_Crystal).addTo(Scene);
+
+
+
+

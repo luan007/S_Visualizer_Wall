@@ -33,12 +33,12 @@ export class pPointsRenderer extends pRenderer {
         var texture = new THREE.ImageUtils.loadTexture("../assets/Dot.png");
         this.material = new THREE.PointsMaterial({
             vertexColors: true,
-            size:5,
+            size: 5,
             transparent: true,
             // opacity: 1,
             // alphaTest: 0.5,
             sizeAttenuation: false,
-            map: texture,
+            // map: texture,
             depthWrite: false,
             blending: THREE.AdditiveBlending
         });
@@ -156,6 +156,61 @@ export class pLinesRenderer extends pRenderer {
                     this.colors[cpos++] =
                     this.colors[cpos++] = 0.1;
             }
+        }
+        // console.log(this.positions)
+        // this.geometry.verticesNeedUpdate =
+        //     this.geometry.colorsNeedUpdate = true;
+        this.geometry.setDrawRange(0, totalConnections * 2);
+        this.geometry.attributes.position.needsUpdate = true;
+        this.geometry.attributes.color.needsUpdate = true;
+        // this.a *= 0.93;
+        // this.a = this.a < 0.001 ? 0.001 : this.a;
+    }
+}
+
+export class pDragLineRenderer extends pRenderer {
+    constructor(params) {
+        super(params);
+        params.size = params.size || 0;
+
+        this.geometry = new THREE.BufferGeometry();
+        this.positions = new Float32Array(params.size * 3 * 2);
+        this.colors = new Float32Array(params.size * 3 * 2);
+
+        this.material = new THREE.LineBasicMaterial({
+            vertexColors: THREE.VertexColors,
+            // color: new THREE.Color(1, 1, 1),
+            transparent: true,
+            blending: THREE.AdditiveBlending
+        });
+
+        this.geometry.addAttribute('position', new THREE.BufferAttribute(this.positions, 3).setDynamic(true));
+        this.geometry.addAttribute('color', new THREE.BufferAttribute(this.colors, 3).setDynamic(true));
+        this.geometry.setDrawRange(0, 0);
+        this.mesh = new THREE.LineSegments(this.geometry, this.material);
+    }
+    onRender(sys) {
+        var vpos = 0;
+        var cpos = 0;
+        var totalConnections = 0;
+        for (var i = 0; i < sys.ps.length && totalConnections < this.params.size; i += 1) {
+            let c = sys.ps[i];
+            if (c._dead) continue;
+            totalConnections++;
+            this.positions[vpos++] = c.p[0];
+            this.positions[vpos++] = c.p[1] - 0.1;
+            this.positions[vpos++] = c.p[2];
+            this.positions[vpos++] = c.p[0];
+            this.positions[vpos++] = c.p[1] - 0.1 - c.v[1] * 10;
+            this.positions[vpos++] = c.p[2];
+
+
+            this.colors[cpos++] = 1;
+            this.colors[cpos++] = 1;
+            this.colors[cpos++] = 1;
+            this.colors[cpos++] = 0
+            this.colors[cpos++] = 0
+            this.colors[cpos++] = 0;
         }
         // console.log(this.positions)
         // this.geometry.verticesNeedUpdate =
