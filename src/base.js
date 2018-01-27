@@ -58,7 +58,12 @@ export class THREERenderable extends Renderable {
     }
     addTo(parent) {
         super.addTo(parent);
-        parent.group.add(this.group);
+        (parent.group && this.group) && parent.group.add(this.group);
+    }
+    add(obj) {
+        super.add(obj);
+        (obj.group && this.group) && this.group.add(obj.group);
+        return this;
     }
     destroy() {
         this.parent.group.remove(this.group);
@@ -81,7 +86,12 @@ export class DOMRenderable extends Renderable {
     }
     addTo(parent) {
         super.addTo(parent);
-        (this.domElement && parent.domElement) && parent.domElement.add(this.domElement);
+        (this.domElement && parent.domElement) && parent.domElement.append(this.domElement);
+    }
+    add(obj) {
+        super.add(obj);
+        (obj.domElement && this.domElement) && this.domElement.append(obj.domElement);
+        return this;
     }
     destroy() {
         (this.domElement && parent.domElement) && this.parent.domElement.remove(this.domElement);

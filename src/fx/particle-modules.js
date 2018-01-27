@@ -30,11 +30,10 @@ export class pPointsRenderer extends pRenderer {
         this.geometry = new THREE.BufferGeometry();
         this.positions = new Float32Array(params.size * 3);
         this.colors = new Float32Array(params.size * 3);
-
         var texture = new THREE.ImageUtils.loadTexture("../assets/Dot.png");
         this.material = new THREE.PointsMaterial({
             vertexColors: true,
-            size: 3,
+            size:5,
             transparent: true,
             // opacity: 1,
             // alphaTest: 0.5,
@@ -61,6 +60,7 @@ export class pPointsRenderer extends pRenderer {
         var cpos = 0;
         for (var i = 0; i < sys.ps.length; i++) {
             let c = sys.ps[i];
+            if (c._dead) continue;
             // this.geometry.vertices[i].x = c.p[0];
             // this.geometry.vertices[i].y = c.p[1];
             // this.geometry.vertices[i].z = c.p[2];
@@ -73,15 +73,15 @@ export class pPointsRenderer extends pRenderer {
             this.positions[vpos++] = c.p[1];
             this.positions[vpos++] = c.p[2];
 
-            this.colors[cpos++] = c.c[0];
-            this.colors[cpos++] = c.c[1];
-            this.colors[cpos++] = c.c[2];
+            this.colors[cpos++] = c.c[0] * c.alpha;
+            this.colors[cpos++] = c.c[1] * c.alpha;
+            this.colors[cpos++] = c.c[2] * c.alpha;
 
         }
         // this.geometry.verticesNeedUpdate =
         //     this.geometry.colorsNeedUpdate = true;
 
-
+        this.geometry.setDrawRange(0, vpos / 3);
         this.geometry.attributes.position.needsUpdate = true;
         this.geometry.attributes.color.needsUpdate = true;
     }
@@ -92,15 +92,14 @@ export class pLinesRenderer extends pRenderer {
         super(params);
         params.size = params.size || 0;
         params.maxPerNode = params.maxPerNode || 2;
-        params.distSq = params.distSq || 500;
+        params.distSq = params.distSq || -1;
 
         this.a = 1;
-
         this.geometry = new THREE.BufferGeometry();
         this.positions = new Float32Array(params.size * 3 * 2);
         this.colors = new Float32Array(params.size * 3 * 2);
 
-        this.material = new THREE.LineBasicMaterial({
+        this.material = new THREE.LineDashedMaterial({
             vertexColors: THREE.VertexColors,
             // color: new THREE.Color(1, 1, 1),
             blending: THREE.AdditiveBlending,
@@ -122,16 +121,20 @@ export class pLinesRenderer extends pRenderer {
         }
         for (var i = 0; i < sys.ps.length && totalConnections < this.params.size; i++) {
             let c = sys.ps[i];
+            if (c._dead) continue;
             for (var j = i + 1; j < sys.ps.length && totalConnections < this.params.size; j++) {
                 let d = sys.ps[j];
+                if (d._dead) continue;
                 if (c.bag.connections > this.params.maxPerNode ||
                     d.bag.connections > this.params.maxPerNode) {
                     break;
                 }
-                // let dist = glmat.vec3.sqrDist(c.p, d.p);
-                // if (dist > this.params.distSq) {
-                //     continue;
-                // }
+                if (this.params.distSq > 0) {
+                    let dist = glmat.vec3.sqrDist(c.p, d.p);
+                    if (dist > this.params.distSq) {
+                        continue;
+                    }
+                }
                 c.bag.connections++;
                 d.bag.connections++;
                 totalConnections++;
@@ -151,7 +154,7 @@ export class pLinesRenderer extends pRenderer {
                     this.colors[cpos++] =
                     this.colors[cpos++] =
                     this.colors[cpos++] =
-                    this.colors[cpos++] = this.a;
+                    this.colors[cpos++] = 0.1;
             }
         }
         // console.log(this.positions)
@@ -160,7 +163,7 @@ export class pLinesRenderer extends pRenderer {
         this.geometry.setDrawRange(0, totalConnections * 2);
         this.geometry.attributes.position.needsUpdate = true;
         this.geometry.attributes.color.needsUpdate = true;
-        this.a *= 0.93;
-        this.a = this.a < 0.001 ? 0.001 : this.a;
+        // this.a *= 0.93;
+        // this.a = this.a < 0.001 ? 0.001 : this.a;
     }
 } 

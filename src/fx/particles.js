@@ -48,6 +48,7 @@ export class pSys {
                 a: ([0, 0, 0]),
                 c: ([1, 1, 1]),
                 l: 0,
+                alpha: 1,
                 m: 1,
                 bag: {},
                 _dead: true

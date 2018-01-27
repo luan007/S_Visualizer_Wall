@@ -1,0 +1,44 @@
+@px: (100 / 3240) * 1vw;
+
+* {
+    font-family: "PingFang SC";
+    color: white;
+    font-size: 9 * @px;
+}
+
+.fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.weibo-floater {
+    .scaler {
+        border: 1 * @px solid white;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    position: fixed;
+    // margin: 3* @px;
+    .at {
+        background: white;
+        display: inline-block;
+        vertical-align: middle;
+        color: black;
+        font-weight: bolder;
+        padding-top: 3 * @px;
+        padding-bottom: 3 * @px;
+        padding-right: 3 * @px;
+        padding-left: 3 * @px;
+    }
+    .content {
+        overflow: hidden;
+        vertical-align: middle;
+        display: inline-block;
+        text-overflow: ellipsis;
+        max-width: 100 * @px;
+        white-space: nowrap;
+    }
+}
