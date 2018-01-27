@@ -59,7 +59,6 @@ export class THREERenderable extends Renderable {
     addTo(parent) {
         super.addTo(parent);
         parent.group.add(this.group);
-        console.log(parent);
     }
     destroy() {
         this.parent.group.remove(this.group);
@@ -74,6 +73,25 @@ export class THREERenderable extends Renderable {
         return this;
     }
 }
+
+export class DOMRenderable extends Renderable {
+    constructor(_render) {
+        super(_render);
+        this.domElement = null;
+    }
+    addTo(parent) {
+        super.addTo(parent);
+        (this.domElement && parent.domElement) && parent.domElement.add(this.domElement);
+    }
+    destroy() {
+        (this.domElement && parent.domElement) && this.parent.domElement.remove(this.domElement);
+        super.destroy();
+    }
+    setEnabled(e) {
+        super.setEnabled(e);
+    }
+}
+
 
 export function BuildRenderable(construction) {
     var renderable = new THREERenderable();

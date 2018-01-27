@@ -73,6 +73,9 @@ export class pSys {
         var elem = this.ps[id];
         elem._dead = false;
         !!!fn || fn(elem);
+        if(fn) {
+            fn(elem);
+        }
         for (var j = 0; j < this.bstack.length; j++) {
             if (!this.bstack[j].params.enabled) continue;
             this.bstack[j].onEmit(elem, id);

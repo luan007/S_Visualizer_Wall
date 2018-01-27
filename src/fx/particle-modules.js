@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { Renderable, THREERenderable, Shared, BuildRenderable } from "../base.js";
 import { pSys, pBehavior, pRenderer } from "./particles.js";
+import * as glmat from "gl-matrix";
 
 export class pMoveBehavior extends pBehavior {
     constructor(params) {
@@ -30,7 +31,7 @@ export class pPointsRenderer extends pRenderer {
         this.positions = new Float32Array(params.size * 3);
         this.colors = new Float32Array(params.size * 3);
 
-        var texture = new THREE.ImageUtils.loadTexture( "../assets/Dot.png" );
+        var texture = new THREE.ImageUtils.loadTexture("../assets/Dot.png");
         this.material = new THREE.PointsMaterial({
             vertexColors: true,
             size: 3,
@@ -53,7 +54,7 @@ export class pPointsRenderer extends pRenderer {
         this.geometry.addAttribute('position', new THREE.BufferAttribute(this.positions, 3).setDynamic(true));
         this.geometry.addAttribute('color', new THREE.BufferAttribute(this.colors, 3).setDynamic(true));
         this.geometry.setDrawRange(0, this.params.size);
-        this.mesh = new THREE.Points(this.geometry, this.material);        
+        this.mesh = new THREE.Points(this.geometry, this.material);
     }
     onRender(sys) {
         var vpos = 0;
@@ -83,5 +84,83 @@ export class pPointsRenderer extends pRenderer {
 
         this.geometry.attributes.position.needsUpdate = true;
         this.geometry.attributes.color.needsUpdate = true;
+    }
+}
+
+export class pLinesRenderer extends pRenderer {
+    constructor(params) {
+        super(params);
+        params.size = params.size || 0;
+        params.maxPerNode = params.maxPerNode || 2;
+        params.distSq = params.distSq || 500;
+
+        this.a = 1;
+
+        this.geometry = new THREE.BufferGeometry();
+        this.positions = new Float32Array(params.size * 3 * 2);
+        this.colors = new Float32Array(params.size * 3 * 2);
+
+        this.material = new THREE.LineBasicMaterial({
+            vertexColors: THREE.VertexColors,
+            // color: new THREE.Color(1, 1, 1),
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            transparent: true
+        });
+
+        this.geometry.addAttribute('position', new THREE.BufferAttribute(this.positions, 3).setDynamic(true));
+        this.geometry.addAttribute('color', new THREE.BufferAttribute(this.colors, 3).setDynamic(true));
+        this.geometry.setDrawRange(0, 0);
+        this.mesh = new THREE.LineSegments(this.geometry, this.material);
+    }
+    onRender(sys) {
+        var vpos = 0;
+        var cpos = 0;
+        var totalConnections = 0;
+        for (var i = 0; i < sys.ps.length; i++) {
+            sys.ps[i].bag.connections = 0;
+        }
+        for (var i = 0; i < sys.ps.length && totalConnections < this.params.size; i++) {
+            let c = sys.ps[i];
+            for (var j = i + 1; j < sys.ps.length && totalConnections < this.params.size; j++) {
+                let d = sys.ps[j];
+                if (c.bag.connections > this.params.maxPerNode ||
+                    d.bag.connections > this.params.maxPerNode) {
+                    break;
+                }
+                // let dist = glmat.vec3.sqrDist(c.p, d.p);
+                // if (dist > this.params.distSq) {
+                //     continue;
+                // }
+                c.bag.connections++;
+                d.bag.connections++;
+                totalConnections++;
+
+                this.positions[vpos++] = c.p[0];
+                this.positions[vpos++] = c.p[1];
+                this.positions[vpos++] = c.p[2];
+                this.positions[vpos++] = d.p[0];
+                this.positions[vpos++] = d.p[1];
+                this.positions[vpos++] = d.p[2];
+
+                // var a = 1 - dist / this.params.distSq;
+                // var alpha = new THREE.Color(a, a, a);
+
+                this.colors[cpos++] =
+                    this.colors[cpos++] =
+                    this.colors[cpos++] =
+                    this.colors[cpos++] =
+                    this.colors[cpos++] =
+                    this.colors[cpos++] = this.a;
+            }
+        }
+        // console.log(this.positions)
+        // this.geometry.verticesNeedUpdate =
+        //     this.geometry.colorsNeedUpdate = true;
+        this.geometry.setDrawRange(0, totalConnections * 2);
+        this.geometry.attributes.position.needsUpdate = true;
+        this.geometry.attributes.color.needsUpdate = true;
+        this.a *= 0.93;
+        this.a = this.a < 0.001 ? 0.001 : this.a;
     }
 } 

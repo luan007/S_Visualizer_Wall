@@ -1,4 +1,4 @@
-import { pMoveBehavior, pPointsRenderer } from "./particle-modules.js";
+import { pMoveBehavior, pPointsRenderer, pLinesRenderer } from "./particle-modules.js";
 import { pSys, pBehavior } from "./particles.js";
 import { THREERenderable, BuildRenderable } from "../base.js";
 import * as THREE from "three";
@@ -159,8 +159,9 @@ var SecondarySystem = BuildRenderable((group) => {
     var blink = new pBlinkBehavior({ enabled: true });
     // var target = new pTargetBehavior({ enabled: true, power: 0.1, powerColor: 0.1, clamp: 0.2 });
     // target.generateDemoTarget("北京721双闪车队");
-    var render = new pPointsRenderer({ size: 5000, enabled: true });
-    var sys = new pSys(5000,
+    var render = new pPointsRenderer({ size: 8000, enabled: true });
+    var linerender = new pLinesRenderer({ size: 8000, enabled: true });
+    var sys = new pSys(8000,
         [
             velocity,
             damp,
@@ -168,25 +169,66 @@ var SecondarySystem = BuildRenderable((group) => {
             // blink
         ],
         [
-            render
+            render,
+            linerender
         ]);
 
+    for (var i = 0; i < 18000 && i < sys.seek(); i++) {
+        sys.emit((pt) => {
+            pt.l = Infinity;
+            pt.p = [0, 0, 0];
+            pt.c = [0.5, 0.5, 0.5];
+            pt.v = [4 * (Math.random() - 0.5), 4 * (Math.random() - 0.5), 15 * (Math.random() - 0.3)];
+        });
+    }
     render.material.sizeAttenuation = true;
     render.material.size = 0.8;
     group.add(render.mesh);
+    group.add(linerender.mesh);
     return () => {
-        for (var i = 0; i < 50000 && i < sys.seek(); i++) {
-            sys.emit((pt) => {
-                pt.l = Infinity;
-                pt.p = [0, 0, 0];
-                pt.c = [0.5, 0.5, 0.5];
-                pt.v = [2 * (Math.random() - 0.5), 2 * (Math.random() - 0.5), 15 * (Math.random())];
-            });
-        }
         sys.update(1);
         sys.render();
     };
 }).addTo(Scene);
+
+var WaveSystem = BuildRenderable((group) => {
+    var velocity = new pMoveBehavior({ enabled: true, stage: "velocity" });
+    var position = new pMoveBehavior({ enabled: true, stage: "position" });
+    var damp = new pDampingBehavior({ enabled: true, power: 0.98 });
+    var blink = new pBlinkBehavior({ enabled: true });
+    // var target = new pTargetBehavior({ enabled: true, power: 0.1, powerColor: 0.1, clamp: 0.2 });
+    // target.generateDemoTarget("北京721双闪车队");
+    var render = new pPointsRenderer({ size: 300, enabled: true });
+    var sys = new pSys(300,
+        [
+            velocity,
+            damp,
+            position,
+            blink
+        ],
+        [
+            render
+        ]);
+
+    render.material.sizeAttenuation = true;
+    render.material.size = 10;
+    render.material.map = THREE.ImageUtils.loadTexture("/assets/DotFlat.png");
+    group.add(render.mesh);
+    return () => {
+        for (var i = 0; i < 2 && i < sys.seek(); i++) {
+            sys.emit((pt) => {
+                pt.l = Infinity;
+                pt.p = [(Math.random() - 0.5) * 650, -120, Math.random() * 300 + 100];
+                pt.c = [1, 1, 1];
+                pt.v = [0, (Math.random() + .1) * 4, 0];
+            });
+        }
+
+        sys.update(1);
+        sys.render();
+    };
+}).addTo(Scene);
+
 
 var cube = THREE.ImageUtils.loadTextureCube([
     '/assets/Env/space/px.png',
@@ -252,36 +294,31 @@ var _tmp_Crystal = (group) => {
         morph.push(wfGeometry);
     }
 
-    // var disk = new THREE.RingGeometry(12, 18, 50, 50);
-    // var diskMat = new THREE.MeshBasicMaterial({
-    //     transparent: true,
-    //     opacity: 0.1,
-    //     blending: THREE.AdditiveBlending,
-    //     // wireframe: true,
-    //     color: new THREE.Color(1.0, 1.0, 1.0)
-    // });
-    // var diskMesh = new THREE.Mesh(disk, diskMat);
-
-
-    // group.add(diskMesh);
+    var disk = new THREE.RingGeometry(18.2, 19, 50, 50);
+    var diskMat = new THREE.MeshBasicMaterial({
+        transparent: true,
+        opacity: 1,
+        blending: THREE.AdditiveBlending,
+        // wireframe: true,
+        color: new THREE.Color(1.0, 0.5, 0),
+    });
+    var diskMesh = new THREE.Mesh(disk, diskMat);
+    group.add(diskMesh);
 
     group.translateX(290 * (Math.random() - 0.5));
     group.translateY(50 * (Math.random() - 0.5));
     group.translateZ(300 - Math.random() * 300);
 
-
     var domElement = $(`
-        <div style='position: fixed; top: 0; left: 0; text-align: right;'>
-            <div style='font-family: "DIN"; font-weight: 600; font-size: 2vw; color: white'>319,381,382</div>
-            <div style='font-family: "PingFang SC"; font-weight: 500; opacity: 0.4; font-size: 1.2vw; color: white'>分享次数</div>
+        <div style="position: fixed; top: 0px; left: 0px; text-align: right; transform: translate(722.586px, 286.145px);">
+            <div style="font-family: 'DIN'; font-weight: 600;font-size: 2vw;color: white;padding: 0.5vh 2vh 1vh 2vh;background: #ff162b85;">319,381,382</div>
+            <div style="font-family: 'PingFang SC' ;font-weight: 200;opacity: 1;font-size: 0.7vw;color: white;margin-top: 6px;">/ 参与用户</div>
         </div>
     `).appendTo(document.body);
 
     return (t) => {
-
         for (var i = 0; i < geometry.vertices.length; i++) {
             let q = Math.floor(noise.perlin3(i / 3, seed, Shared.t * 2) * 3) / 3;
-
             var norm = geometry.vertices[i].normalize();
             var n = norm.clone();
             norm.multiplyScalar(q * 5 + 10);
@@ -289,7 +326,7 @@ var _tmp_Crystal = (group) => {
             var c = n.clone().multiplyScalar(q * 6 + 10);
             var s = n.clone().multiplyScalar((Math.random() - 0.5) * 1);
 
-            for(var j = 1; j < morph.length; j++) {
+            for (var j = 1; j < morph.length; j++) {
                 morph[j].vertices[i].x = norm.x;
                 morph[j].vertices[i].y = norm.y;
                 morph[j].vertices[i].z = norm.z;
@@ -297,7 +334,7 @@ var _tmp_Crystal = (group) => {
         }
         geometry.verticesNeedUpdate = true;
 
-        for(var j = 1; j < morph.length; j++) {
+        for (var j = 1; j < morph.length; j++) {
             morph[j].verticesNeedUpdate = true;
         }
 
