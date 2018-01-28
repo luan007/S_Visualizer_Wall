@@ -61,7 +61,7 @@ export function update(data) {
     camera.position.z += (500 - camera.position.z) * 0.02;
     root.update(data);
     renderer.render(scene, camera);
-    // NEWTRY.update();
+    NEWTRY.update();
 }
 
 onresize = function () {

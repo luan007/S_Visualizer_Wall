@@ -69,13 +69,13 @@ var WaveSystem = BuildRenderable((group) => {
         target.params.power = Shared.timeline.at(0, 2, Shared.timeline.EasingFunctions.linear, 0, 0.01);
         random.params.power = Shared.timeline.at(0, 7, Shared.timeline.EasingFunctions.linear, 0.8, 0);
 
-        gravity.params.enabled = Shared.timeline.at(0, 3, Shared.timeline.EasingFunctions.linear) > 0.9;
+        gravity.params.enabled = Shared.timeline.at(0, 4, Shared.timeline.EasingFunctions.linear) > 0.9;
         // console.log(gravity.params.enabled);
 
         // target.params.enabled = Shared.timeline.t < 4;
         // gravity.params.enabled = gravity.params.enabled && Shared.timeline.t < 7;
         gravity.params.g = Shared.timeline.at(4, 1, Shared.timeline.EasingFunctions.linear, 3000, -20000);
-        sys.update(Shared.timeline.at(3, 8, Shared.timeline.EasingFunctions.linear, 1, 0.03));
+        sys.update(Shared.timeline.at(3, 8, Shared.timeline.EasingFunctions.linear, 1, 0.15));
         sys.render();
     };
 }).addTo(Scene);
@@ -213,8 +213,8 @@ export function update() {
         for (var y = 0; y < 960; y += step) {
             let jibu = 255; // Math.floor((Math.sin(x / 1000 + Shared.t * 10) * 0.5 + 1) * 255);
             let jibu2 = Math.pow(Math.abs(noise.perlin3(x / 50, -y / 1559 - Shared.t * 0.3, Shared.t * 1.2)), 1) *
-                Shared.timeline.at(8, 1, Shared.timeline.EasingFunctions.easeOutQuad, 0.5, 0.05) *
-                Shared.timeline.at(6, 2, Shared.timeline.EasingFunctions.easeOutQuad, 0, 0.5);
+                Shared.timeline.at(1, 3, Shared.timeline.EasingFunctions.easeOutQuad, 1, 0.05) *
+                Shared.timeline.at(0, 1, Shared.timeline.EasingFunctions.easeInQuad, 0, 1);
 
             let cq = false;
             for (var i = 0; i < Shared.posX.length; i++) {

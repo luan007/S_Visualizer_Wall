@@ -6,5 +6,5 @@ root.domElement.appendTo($(document.body));
 // root.add(new DOMFx.WeiboFloaterManager());
 
 export function update() {
-    // root.update();
+    root.update();
 }
