@@ -1,16 +1,18 @@
 import * as THREE from "three";
 import { Renderable, THREERenderable, Shared, BuildRenderable } from "./base.js";
-import * as ParticleDebug from "./fx/particle-debug.js";
+// import * as ParticleDebug from "./fx/particle-debug.js";
+import * as NEWTRY from "./fx/new-try.js";
 
 var canvas = document.getElementById('maincanvas');
 
 var renderer = new THREE.WebGLRenderer({
     antialias: true,
-    // alpha: true,
+    alpha: true,
     canvas: canvas
 });
 
-renderer.setClearColor(new THREE.Color(0x211D1D), 1);
+//0x211D1D
+renderer.setClearColor(new THREE.Color(0x000000), 0);
 renderer.setSize(Shared.W, Shared.H);
 renderer.gammaInput = true;
 renderer.gammaOutput = true;
@@ -28,7 +30,7 @@ Shared.camera = camera;
 var root = new THREERenderable();
 // var ambientLight = new THREE.AmbientLight(0xffff00);
 var scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0x000, 1, 1500);
+scene.fog = new THREE.Fog(0x000, 1, 20000);
 scene.add(root.group);
 
 
@@ -54,24 +56,34 @@ scene.add(light2);
 //     }
 // })
 
-ParticleDebug.Scene.addTo(root);
 
 export function update(data) {
     camera.position.z += (500 - camera.position.z) * 0.02;
     root.update(data);
     renderer.render(scene, camera);
+    // NEWTRY.update();
 }
 
 onresize = function () {
     var w = window.innerWidth;
     var h = w / Shared.W * Shared.H;
-    canvas.style.width = w;
-    canvas.style.height = h;
+    $(".suite-canvas").css({
+        width: w,
+        height: h
+    });
+    // canvas.style.width = w;
+    // canvas.style.height = h;
     Shared.w = w;
     Shared.h = h;
 }
 
-onresize();
+setTimeout(()=>{
+    onresize();
+}, 300);
 
 
 
+
+
+// ParticleDebug.Scene.addTo(root);
+NEWTRY.Scene.addTo(root);

@@ -1,0 +1,84 @@
+<html>
+
+<head>
+    <title>sina</title>
+    <meta charset="UTF-8">
+    <style>
+        * {
+            user-select: none;
+        }
+        html {
+            background: #333;
+        }
+        #bgCanvas {
+            background: #111;
+        }
+        #maincanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            /* background: black; */
+            width: 100%;
+            /* height: 960px; */
+        }
+        .suite-canvas{
+            position: fixed;
+            top: 0;
+            left: 0;
+
+        }
+    </style>
+    <script src="/libs/odometer.min.js"></script>
+    <link rel="stylesheet" href="/libs/odometer-theme-minimal.css">
+    <script src="/node_modules/jquery/dist/jquery.min.js"></script>
+</head>
+
+<body>
+    <canvas class='suite-canvas' id='maincanvas'></canvas>
+    <div class='container'>
+        <div class='title'>
+            <!-- <span>北</span>
+            <span>京</span>
+            <span>7</span>
+            <span>2</span>
+            <span>1</span>
+            <span>双</span>
+            <span>闪</span>
+            <span>车</span>
+            <span>队</span> -->
+            <span>#</span>
+            <span>十</span>
+            <span>九</span>
+            <span>大</span>
+            <span>#</span>
+        </div>
+        <div class='intro'>
+            十九大10月18日在北京召开，事关党和国家事业继往开来，事关中国特色社会主义前途命运，事关最广大人民根本利益。全民关注，继往开来。
+        </div>
+        <div class='numbers'>
+            <div class='block'>
+                <span class='odometer block-value' data-value='56.8'>0</span> <span> 亿</span>
+                <div class='block-title'>VIEWS / 话题阅读量</div>
+            </div>
+            <div class='block'>
+                <span class='odometer block-value' data-value='868.6'>0</span><span> 万</span>
+                <div class='block-title'>PARTICIPANTS / 话题讨论量</div>
+            </div>
+            <!-- <div class='block'>193,493,293
+                <div>MESSAGES / 消息数量</div>
+            </div> -->
+        </div>
+    </div>
+    <!-- <div class='title'>北京721双闪车队</div> -->
+    <script src='build/main.js'></script>
+    <script>
+        setTimeout(() => {
+            $("body").addClass("show");
+            $(".block-value").each((i, e)=>{
+                $(e).text(e.attributes.getNamedItem("data-value").value);
+            });
+        }, 1300);
+    </script>
+</body>
+
+</html>

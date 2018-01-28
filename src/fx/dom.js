@@ -31,7 +31,7 @@ export class WeiboFloater extends DOMRenderable {
         this.dom_at = $(this.domElement.find(".at")[0]);
         this.dom_content = $(this.domElement.find(".content")[0]);
         this.dom_content.css("max-width", px(Math.random() * 100 + 55))
-        this.domElement.css("transform", `translate(${px(Math.random() * 3240)}, ${px(Math.floor(Math.random() * 960 / 40) * 40)})`);
+        this.domElement.css("transform", `translate(${px(Math.random() * 3240)}, ${px(960 - 40 - Math.floor(Math.random() * 360 / 40) * 40)})`);
         this.dom_scaler.css("transform", `scale(${r}, ${r})`);
     }
 }
