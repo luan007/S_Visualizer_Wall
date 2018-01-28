@@ -372,6 +372,11 @@ export class pBlinkBehavior extends pBehavior {
     onUpdate(pt, i, t) {
         var a = Math.sin((i / 100 + Shared.t * 10));
         pt.c[0] = pt.c[1] = pt.c[2] = a * a * 0.8;
+        if(pt.p[2] > 10 && pt.p[2] < 85) {
+            // pt.c[1] = pt.c[2] = 1;
+            // pt.c[0] = 1;
+            
+        }
     }
 }
 

@@ -3,15 +3,56 @@ import * as DOMFx from "./dom.js";
 import { Shared, DOMRenderable } from "../base.js";
 import "./perlin.js";
 
+export var root = new DOMFx.FixedContainer();
+root.domElement.appendTo($(document.body));
+
 import {
     pMoveBehavior, pPointsRenderer, pLinesRenderer, pDragLineRenderer,
     pTargetBehavior, pBlinkBehavior, pFadeBehavior, pDampingBehavior,
     pGravityBehavior, pNoiseBehavior, pRandomBehavior
 } from "./particle-modules.js";
-import { pSys, pBehavior } from "./particles.js";
+import { pSys, pBehavior, pRenderer } from "./particles.js";
 import { THREERenderable, BuildRenderable } from "../base.js";
 import * as THREE from "three";
 import * as glmat from "gl-matrix";
+
+
+export class pDomRenderer extends pRenderer {
+    constructor(params) {
+        super(params);
+        params.size = params.size || 0;
+        params.range_min = params.range_min || 10;
+        params.range_max = params.range_max || 85;
+        this.manager = new DOMFx.WeiboFloaterManager(() => { }, params.size);
+        this.floaters = this.manager.floaters;
+        root.add(this.manager);
+    }
+    onRender(sys) {
+        for (var i = 0; i < sys.ps.length; i++) {
+            let c = sys.ps[i];
+            if (c._dead) continue;
+
+            if (c.p[2] > this.params.range_min && c.p[2] < this.params.range_max && Math.random() > 0.01) {
+                //good
+                if (!c.bag.floater && this.floaters.length && Math.random() > 0.99) {
+                    c.bag.floater = this.floaters.pop();
+                }
+                if (!c.bag.floater) {
+                    continue;
+                }
+                var vector = new THREE.Vector3(c.p[0], c.p[1], c.p[2]).project(Shared.camera);
+                vector.x = (vector.x + 1) / 2 * Shared.W;
+                vector.y = -(vector.y - 1) / 2 * Shared.H;
+                c.bag.floater.setPos(vector.x, vector.y, 1);
+                c.bag.floater.show();
+            } else if (c.bag.floater) {
+                c.bag.floater.hide();
+                this.floaters.push(c.bag.floater);
+                c.bag.floater = undefined;
+            }
+        }
+    }
+}
 
 
 export var Scene = new THREERenderable();
@@ -29,8 +70,9 @@ var WaveSystem = BuildRenderable((group) => {
     var position = new pMoveBehavior({ enabled: true, stage: "position" });
     var blink = new pBlinkBehavior({ enabled: true });
     var fade = new pFadeBehavior({ enabled: true, speed: 0.01 });
-    var render = new pPointsRenderer({ size: 30000, enabled: true });
-    var sys = new pSys(30000,
+    var render = new pPointsRenderer({ size: 20000, enabled: true });
+    var domrenderer = new pDomRenderer({ size: 50, enabled: true })
+    var sys = new pSys(20000,
         [
             target,
             gravity,
@@ -43,10 +85,11 @@ var WaveSystem = BuildRenderable((group) => {
             blink
         ],
         [
-            render
+            render,
+            domrenderer
         ]);
 
-    for (var i = 0; i < 30000 && i < sys.seek(); i++) {
+    for (var i = 0; i < 20000 && i < sys.seek(); i++) {
         sys.emit((pt) => {
             pt.l = Infinity;
             let deg = Math.random() * Math.PI * 2;
@@ -83,19 +126,9 @@ var WaveSystem = BuildRenderable((group) => {
 
 
 
-
-
-
-
-
-
-
 function px(p) {
     return ((100 / 3240) * p) + "vw";
 }
-
-export var root = new DOMFx.FixedContainer();
-root.domElement.appendTo($(document.body));
 
 class AvatarManager extends DOMRenderable {
     constructor(_render) {
@@ -213,8 +246,8 @@ export function update() {
         for (var y = 0; y < 960; y += step) {
             let jibu = 255; // Math.floor((Math.sin(x / 1000 + Shared.t * 10) * 0.5 + 1) * 255);
             let jibu2 = Math.pow(Math.abs(noise.perlin3(x / 50, -y / 1559 - Shared.t * 0.3, Shared.t * 1.2)), 1) *
-                Shared.timeline.at(8, 1, Shared.timeline.EasingFunctions.easeOutQuad, 0.5, 0.05) *
-                Shared.timeline.at(6, 2, Shared.timeline.EasingFunctions.easeOutQuad, 0, 0.5);
+                Shared.timeline.at(9, 1, Shared.timeline.EasingFunctions.easeOutQuad, 0.8, 0.05) *
+                Shared.timeline.at(6, 3, Shared.timeline.EasingFunctions.easeOutQuad, 0, 0.8);
 
             let cq = false;
             for (var i = 0; i < Shared.posX.length; i++) {

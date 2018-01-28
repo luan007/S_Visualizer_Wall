@@ -16,6 +16,12 @@ export class FixedContainer extends DOMRenderable {
 }
 
 export class WeiboFloater extends DOMRenderable {
+    show() {
+        this.domElement.addClass("show");
+    }
+    hide() {
+        this.domElement.removeClass("show");
+    }
     constructor(_render) {
         super(_render);
         this.domElement = $(`
@@ -26,25 +32,31 @@ export class WeiboFloater extends DOMRenderable {
                 </div>
             </div>
         `);
-        var r = Math.random() * .5 + 0.3;
         this.dom_scaler = $(this.domElement.find(".scaler")[0]);
         this.dom_at = $(this.domElement.find(".at")[0]);
         this.dom_content = $(this.domElement.find(".content")[0]);
-        this.dom_content.css("max-width", px(Math.random() * 100 + 55))
-        this.domElement.css("transform", `translate(${px(Math.random() * 3240)}, ${px(960 - 40 - Math.floor(Math.random() * 360 / 40) * 40)})`);
+        this.dom_content.css("max-width", px(Math.random() * 50 + 25))
+        // this.domElement.css("transform", `translate(${px(Math.random() * 3240)}, ${px(960 - 40 - Math.floor(Math.random() * 360 / 40) * 40)})`);
+        // this.dom_scaler.css("transform", `scale(${r}, ${r})`);
+    }
+
+    setPos(x, y, r) {
+        this.domElement.css("transform", `translate(${px(x)}, ${px(y)})`);
         this.dom_scaler.css("transform", `scale(${r}, ${r})`);
     }
 }
 
 export class WeiboFloaterManager extends Renderable {
-    constructor(_render) {
+    constructor(_render, size) {
         super(_render);
         this.domElement = $(`
             <div class="weibo-floaters"></div>
         `);
-        for (var i = 0; i < 90; i++) {
+        this.floaters = [];
+        for (var i = 0; i < size; i++) {
             var floater = new WeiboFloater();
             floater.addTo(this);
+            this.floaters.push(floater);
         }
     }
 }
