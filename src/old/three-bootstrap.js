@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import { Renderable, THREERenderable, Shared, BuildRenderable } from "./base.js";
-// import * as ParticleDebug from "./fx/particle-debug.js";
 import * as NEWTRY from "./fx/new-try.js";
 
 var canvas = document.getElementById('maincanvas');
@@ -16,7 +15,6 @@ renderer.setClearColor(new THREE.Color(0x000000), 0);
 renderer.setSize(Shared.W, Shared.H);
 renderer.gammaInput = true;
 renderer.gammaOutput = true;
-
 
 var camera = new THREE.PerspectiveCamera(
     20,
@@ -42,21 +40,6 @@ light2.translateY(-90);
 light2.translateZ(-30);
 scene.add(light2);
 
-
-// scene.add(ambientLight);
-
-// root.build((group) => {
-//     var geometry = new THREE.TetrahedronGeometry(5, 0);
-//     var material = new THREE.MeshNormalMaterial();
-//     var mesh = new THREE.Mesh(geometry, material);
-//     group.add(mesh);
-//     return (o) => {
-//         mesh.rotateX(0.01);
-//         mesh.rotateY(0.02);
-//     }
-// })
-
-
 export function update(data) {
     camera.position.z += (500 - camera.position.z) * 0.02;
     root.update(data);
@@ -80,9 +63,6 @@ onresize = function () {
 setTimeout(()=>{
     onresize();
 }, 300);
-
-
-
 
 
 // ParticleDebug.Scene.addTo(root);

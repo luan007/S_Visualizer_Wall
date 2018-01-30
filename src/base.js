@@ -1,16 +1,52 @@
 //structure
 import * as THREE from 'three';
 
+export class SceneControl extends Renderable {
+    constructor(e) {
+        super(e);
+        this.sceneId = 0;
+        this.stage = true;
+        this.stageMatch = false;
+        this.nextStage = undefined;
+        this.managed = [];
+    }
+    visible() {
+        this.nextStage = true;
+    }
+    collapse() {
+        this.nextStage = false;
+    }
+
+    render() {
+        //stage match calc
+        this.stageMatch = true;
+        for (var i = 0; i < this.managed.length; i++) {
+            if (this.managed[i].isVisible !== this.stage) {
+                this.stageMatch = false;
+                break;
+            }
+        }
+        if (this.nextStage !== undefined && this.stageMatch) {
+            this.stage = this.nextStage;
+            this.nextStage = undefined;
+        }
+    }
+}
 
 export class Renderable {
-    constructor(_render) {
+    constructor(childrens) {
         // this.group = new THREE.Group();
         this.children = [];
         this._markRemoval = false;
         this._childrenDirty = false;
         this._parent = null;
         this._enabled = true;
-        this._render = _render;
+        this._render = () => { };
+        if (childrens && Array.isArray(childrens)) {
+            childrens.forEach(element => {
+                this.add(element);
+            });
+        }
     }
     addTo(parent) {
         if (!(parent instanceof Renderable)) throw new Error('type mismatch');
@@ -53,20 +89,18 @@ export class Renderable {
     }
 }
 
-
 export class THREERenderable extends Renderable {
     constructor(_render) {
         super(_render);
         this.group = new THREE.Group();
     }
     addTo(parent) {
-        super.addTo(parent);
         (parent.group && this.group) && parent.group.add(this.group);
+        return super.addTo(parent);
     }
     add(obj) {
-        super.add(obj);
         (obj.group && this.group) && this.group.add(obj.group);
-        return this;
+        return super.add(obj);
     }
     destroy() {
         this.parent.group.remove(this.group);
@@ -88,13 +122,12 @@ export class DOMRenderable extends Renderable {
         this.domElement = null;
     }
     addTo(parent) {
-        super.addTo(parent);
         (this.domElement && parent.domElement) && parent.domElement.append(this.domElement);
+        return super.addTo(parent);
     }
     add(obj) {
-        super.add(obj);
         (obj.domElement && this.domElement) && this.domElement.append(obj.domElement);
-        return this;
+        return super.add(obj);
     }
     destroy() {
         (this.domElement && parent.domElement) && this.parent.domElement.remove(this.domElement);
@@ -104,7 +137,6 @@ export class DOMRenderable extends Renderable {
         super.setEnabled(e);
     }
 }
-
 
 export function BuildRenderable(construction) {
     var renderable = new THREERenderable();
@@ -177,6 +209,10 @@ export class Timer extends Renderable {
         return ease(t);
     }
 
+    p(tfrom, tto, ease, from, to) {
+        return atob(tfrom, tto - tfrom, ease, from, to);
+    }
+
     update(data) {
         super.update();
         if (this.running) {
@@ -210,45 +246,3 @@ export class SlideEase extends Renderable {
         this.v += (this.target - this.v) * this.factor;
     }
 }
-
-
-//shared events
-import EventEmitter from "event-emitter";
-export var Events = new EventEmitter();
-
-var abstractRoot = new Renderable();
-//shared vars
-
-export var Shared = {
-    W: 3240,
-    H: 960,
-    t: 0,
-    timeline: new Timer(),
-    posX: [
-        new SlideEase().addTo(abstractRoot)
-    ],
-};
-
-document.addEventListener("mousemove", (e) => {
-    Shared.posX[0].set(e.pageX / window.innerWidth * Shared.W);
-    Shared.posX[0].x = (e.pageX / window.innerWidth * Shared.W);
-    Shared.posX[0].y = (e.pageY / window.innerWidth * Shared.W);
-});
-
-document.addEventListener("mousedown", (e) => {
-    Shared.posX[0].pressed = true;
-});
-
-document.addEventListener("mouseup", (e) => {
-    Shared.posX[0].pressed = false;
-});
-
-window.Shared = Shared;
-
-export function update() {
-    Shared.t += 0.01;
-    abstractRoot.update();
-}
-
-abstractRoot.add(Shared.timeline);
-Shared.timeline.start();

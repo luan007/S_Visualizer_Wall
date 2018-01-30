@@ -1,0 +1,50 @@
+@px: (100 / 3240) * 1vw;
+
+.gui-title.show > span {
+    margin-left: 40 * @px;
+    margin-right: 40 * @px;
+    transition: all 4.0s ease;
+    background-position: 0% 0%;
+    filter: blur(0px);
+}
+
+.gui-title.destroy > span {
+    margin-left: 50 * @px;
+    margin-right: 50 * @px;
+    transition: all 1.5s ease;
+    background-position: 100% 100%;
+    filter: blur(10px);
+}
+
+.gui-title {
+    position: fixed;
+    font-weight: bolder;
+    top: 300 * @px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    // transform: translate(0, -60%);
+
+    span {
+        transition: all 2.5s ease;
+        // transition: all 0.02s linear;
+        font-weight: bolder;
+        font-family: 'Source Han Sans CN';
+        font-kerning: normal;
+        margin-left: 10 * @px;
+        margin-right: 10 * @px;
+        text-align: left;
+        font-size: 150 * @px;
+        display: inline-block;
+        background: linear-gradient(150deg, #FFF 25%, rgba(255,255,255,0) 50%);
+        background-size: 200% auto;
+        background-position: 100% 100%;
+        filter: blur(10px);
+        color: #000;
+        background-clip: text;
+        text-fill-color: transparent;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+}

@@ -16,7 +16,6 @@ import { THREERenderable, BuildRenderable } from "../base.js";
 import * as THREE from "three";
 import * as glmat from "gl-matrix";
 
-
 export class pDomRenderer extends pRenderer {
     constructor(params) {
         super(params);
@@ -122,8 +121,6 @@ var WaveSystem = BuildRenderable((group) => {
         sys.render();
     };
 }).addTo(Scene);
-
-
 
 
 function px(p) {

@@ -36,22 +36,13 @@
 <body>
     <canvas class='suite-canvas' id='maincanvas'></canvas>
     <div class='container'>
-        <div class='title'>
-            <!-- <span>北</span>
-            <span>京</span>
-            <span>7</span>
-            <span>2</span>
-            <span>1</span>
-            <span>双</span>
-            <span>闪</span>
-            <span>车</span>
-            <span>队</span> -->
+        <!-- <div class='title'>
             <span>#</span>
             <span>十</span>
             <span>九</span>
             <span>大</span>
             <span>#</span>
-        </div>
+        </div> -->
         <div class='intro'>
             十九大10月18日在北京召开，事关党和国家事业继往开来，事关中国特色社会主义前途命运，事关最广大人民根本利益。全民关注，继往开来。
         </div>
@@ -72,12 +63,12 @@
     <!-- <div class='title'>北京721双闪车队</div> -->
     <script src='build/main.js'></script>
     <script>
-        setTimeout(() => {
-            $("body").addClass("show");
+        // setTimeout(() => {
+        //     $("body").addClass("show");
             $(".block-value").each((i, e)=>{
                 $(e).text(e.attributes.getNamedItem("data-value").value);
             });
-        }, 3800);
+        // }, 3800);
     </script>
 </body>
 
