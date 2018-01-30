@@ -6,7 +6,6 @@ import * as THREE from "three";
 export class THREERenderTarget extends THREERenderable {
     constructor(e) {
         super(e);
-
         this.canvas = document.getElementById('maincanvas');
         this.renderer = new THREE.WebGLRenderer({
             antialias: true,

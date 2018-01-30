@@ -219,6 +219,7 @@ export class SlideEase extends Renderable {
 
 
 export class SceneControl extends Renderable {
+
     constructor(e) {
         super(e);
         this.sceneId = -1;
@@ -226,13 +227,17 @@ export class SceneControl extends Renderable {
         this.stage = false;
         this.stageMatch = false;
         this.nextStage = undefined;
+        this.data = [1,2,3];
         this.managed = [];
         this.autoManage = true;
     }
+
     _visible() {
-        this.nextStage = true;
-        for (var i = 0; i < this.managed.length; i++) {
-            this.managed[i].in(this.sceneId);
+        if (this.data[this.sceneId]) {
+            this.nextStage = true;
+            for (var i = 0; i < this.managed.length; i++) {
+                this.managed[i].in(this.data[this.sceneId]);
+            }
         }
     }
     _collapse() {
