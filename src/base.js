@@ -1,73 +1,7 @@
 //structure
 import * as THREE from 'three';
 
-export class SceneControl extends Renderable {
-    constructor(e) {
-        super(e);
-        this.sceneId = -1;
-        this.nextSceneId = 0;
-        this.stage = true;
-        this.stageMatch = false;
-        this.nextStage = undefined;
-        this.managed = [];
-        this.autoManage = true;
-    }
-    _visible() {
-        if (this.stage !== true) {
-            this.nextStage = true;
-            for (var i = 0; i < this.managed.length; i++) {
-                this.managed[i].in(this.stage);
-            }
-        }
-    }
-    _collapse() {
-        if (this.stage !== false) {
-            this.nextStage = false;
-            for (var i = 0; i < this.managed.length; i++) {
-                this.managed[i].out();
-            }
-        }
-    }
 
-    setScene(s) {
-        if (s !== this.stage) {
-            this.nextSceneId = s;
-            if (this.autoManage) {
-                this._collapse();
-            }
-        }
-    }
-
-    render() {
-        //stage match calc
-        this.stageMatch = true;
-        for (var i = 0; i < this.managed.length; i++) {
-            if (this.managed[i].isVisible !== this.stage) {
-                this.stageMatch = false;
-                break;
-            }
-        }
-        if (this.nextStage !== undefined && this.stageMatch) {
-            this.stage = this.nextStage;
-            this.nextStage = undefined;
-        }
-
-        if (this.autoManage) {
-
-            if (this.nextSceneId == undefined
-                && this.stage == false &&
-                this.stageMatch == true) {
-                this._visible();
-            }
-
-            //only switch when dark
-            if (this.nextSceneId !== undefined && this.nextSceneId != this.sceneId && this.stageMatch && this.stage == false) {
-                this.sceneId = this.nextSceneId;
-                this.nextSceneId = undefined;
-            }
-        }
-    }
-}
 
 export class Renderable {
     constructor(childrens) {
@@ -131,12 +65,12 @@ export class THREERenderable extends Renderable {
         this.group = new THREE.Group();
     }
     addTo(parent) {
+        super.addTo(parent);
         (parent.group && this.group) && parent.group.add(this.group);
-        return super.addTo(parent);
     }
     add(obj) {
+        super.add(obj);
         (obj.group && this.group) && this.group.add(obj.group);
-        return super.add(obj);
     }
     destroy() {
         this.parent.group.remove(this.group);
@@ -159,11 +93,11 @@ export class DOMRenderable extends Renderable {
     }
     addTo(parent) {
         (this.domElement && parent.domElement) && parent.domElement.append(this.domElement);
-        return super.addTo(parent);
+        super.addTo(parent);
     }
     add(obj) {
         (obj.domElement && this.domElement) && this.domElement.append(obj.domElement);
-        return super.add(obj);
+        super.add(obj);
     }
     destroy() {
         (this.domElement && parent.domElement) && this.parent.domElement.remove(this.domElement);
@@ -280,5 +214,78 @@ export class SlideEase extends Renderable {
     update(data) {
         super.update();
         this.v += (this.target - this.v) * this.factor;
+    }
+}
+
+
+export class SceneControl extends Renderable {
+    constructor(e) {
+        super(e);
+        this.sceneId = -1;
+        this.nextSceneId = 0;
+        this.stage = false;
+        this.stageMatch = false;
+        this.nextStage = undefined;
+        this.managed = [];
+        this.autoManage = true;
+    }
+    _visible() {
+        if (this.stage !== true) {
+            this.nextStage = true;
+            console.log("Pending Stage", this.nextStage);
+            for (var i = 0; i < this.managed.length; i++) {
+                this.managed[i].in(this.stage);
+            }
+        }
+    }
+    _collapse() {
+        if (this.stage !== false) {
+            this.nextStage = false;
+            console.log("Pending Stage", this.nextStage);
+            for (var i = 0; i < this.managed.length; i++) {
+                this.managed[i].out();
+            }
+        }
+    }
+
+    setScene(s) {
+        if (s !== this.sceneId && s !== this.nextSceneId) {
+            console.log("set stage", s);
+            this.nextSceneId = s;
+            if (this.autoManage) {
+                this._collapse();
+            }
+        }
+    }
+
+    render() {
+        //stage match calc
+        this.stageMatch = true;
+        for (var i = 0; i < this.managed.length; i++) {
+            if (this.managed[i].isVisible !== this.stage) {
+                this.stageMatch = false;
+                break;
+            }
+        }
+        if (this.nextStage !== undefined && this.stageMatch) {
+            console.log("Next Stage!", this.nextStage);
+            this.stage = this.nextStage;
+            this.nextStage = undefined;
+        }
+
+        if (this.autoManage) {
+
+            if (this.nextSceneId == undefined
+                && this.stage == false &&
+                this.stageMatch == true) {
+                this._visible();
+            }
+
+            //only switch when dark
+            if (this.nextSceneId !== undefined && this.nextSceneId != this.sceneId && this.stageMatch && this.stage == false) {
+                this.sceneId = this.nextSceneId;
+                this.nextSceneId = undefined;
+            }
+        }
     }
 }

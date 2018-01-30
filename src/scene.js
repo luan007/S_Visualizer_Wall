@@ -1,17 +1,22 @@
 import { Shared } from "./env.js"; //setup
 import { THREERenderTarget } from "./parts/three-particlebg.js";
-import { Renderable } from "./base.js";
+import { Renderable, SceneControl } from "./base.js";
 import * as GUI from "./parts/gui.js";
 
+var Scene = new SceneControl();
 
 var ThreeRenderTarget = new THREERenderTarget();
 var DOMContainer = new GUI.FixedContainer();
-    DOMContainer.domElement.appendTo($(document.body));
-    var title = new GUI.Title();
-    DOMContainer.add(title);
+DOMContainer.domElement.appendTo($(document.body));
+var title = new GUI.Title();
+DOMContainer.add(title);
 
 
-var root = new Renderable([ThreeRenderTarget, DOMContainer]);
+Scene.managed.push(title);
+
+window.scene = Scene;
+
+var root = new Renderable([Scene, ThreeRenderTarget, DOMContainer]);
 export function update() {
     root.update();
 }
