@@ -230,27 +230,20 @@ export class SceneControl extends Renderable {
         this.autoManage = true;
     }
     _visible() {
-        if (this.stage !== true) {
-            this.nextStage = true;
-            console.log("Pending Stage", this.nextStage);
-            for (var i = 0; i < this.managed.length; i++) {
-                this.managed[i].in(this.stage);
-            }
+        this.nextStage = true;
+        for (var i = 0; i < this.managed.length; i++) {
+            this.managed[i].in(this.sceneId);
         }
     }
     _collapse() {
-        if (this.stage !== false) {
-            this.nextStage = false;
-            console.log("Pending Stage", this.nextStage);
-            for (var i = 0; i < this.managed.length; i++) {
-                this.managed[i].out();
-            }
+        this.nextStage = false;
+        for (var i = 0; i < this.managed.length; i++) {
+            this.managed[i].out();
         }
     }
 
     setScene(s) {
         if (s !== this.sceneId && s !== this.nextSceneId) {
-            console.log("set stage", s);
             this.nextSceneId = s;
             if (this.autoManage) {
                 this._collapse();
@@ -261,19 +254,23 @@ export class SceneControl extends Renderable {
     render() {
         //stage match calc
         this.stageMatch = true;
-        for (var i = 0; i < this.managed.length; i++) {
-            if (this.managed[i].isVisible !== this.stage) {
-                this.stageMatch = false;
-                break;
+        if (this.nextStage !== undefined) {
+            for (var i = 0; i < this.managed.length; i++) {
+                if (this.managed[i].isVisible !== this.nextStage || this.managed[i].transition) {
+                    this.stageMatch = false;
+                    break;
+                }
             }
         }
         if (this.nextStage !== undefined && this.stageMatch) {
-            console.log("Next Stage!", this.nextStage);
             this.stage = this.nextStage;
             this.nextStage = undefined;
         }
 
         if (this.autoManage) {
+            if (!this.stageMatch && this.nextStage !== undefined) {
+                this.nextStage ? this._visible() : this._collapse();
+            }
 
             if (this.nextSceneId == undefined
                 && this.stage == false &&

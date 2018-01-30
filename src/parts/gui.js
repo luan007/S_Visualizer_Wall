@@ -19,7 +19,9 @@ export class FixedContainer extends DOMRenderable {
 export class Title extends DOMRenderable {
     constructor() {
         super();
+        this.cacheState = false;
         this.isVisible = false;
+        this.transition = false;
         this.domElement = $(
             `<div class='gui-title'></div>`
         );
@@ -33,7 +35,7 @@ export class Title extends DOMRenderable {
                 } else {
                     this.isVisible = true;
                 }
-                console.log(this.isVisible);
+                this.transition = false;
             }, 200);
         });
         this.text = "{PLACE HOLDER}";
@@ -42,11 +44,17 @@ export class Title extends DOMRenderable {
         // this.isVisible = false;
     }
 
-    in() {
+    in(t) {
+        if (this.cacheState == true) return;
+        this.cacheState = true;
+        this.text = "{SCENE #" + t + "}";
         this._generateDom();
     }
 
     out() {
+        if (this.cacheState == false) return;
+        this.cacheState = false;
+        this.transition = true;
         this.domElement.removeClass("show");
     }
 
@@ -64,6 +72,7 @@ export class Title extends DOMRenderable {
         }
         setTimeout(() => {
             this.domElement.addClass("show");
+            this.transition = true;
         }, 100);
     }
 
