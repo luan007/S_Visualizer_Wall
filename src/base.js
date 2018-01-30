@@ -4,17 +4,38 @@ import * as THREE from 'three';
 export class SceneControl extends Renderable {
     constructor(e) {
         super(e);
-        this.sceneId = 0;
+        this.sceneId = -1;
+        this.nextSceneId = 0;
         this.stage = true;
         this.stageMatch = false;
         this.nextStage = undefined;
         this.managed = [];
+        this.autoManage = true;
     }
-    visible() {
-        this.nextStage = true;
+    _visible() {
+        if (this.stage !== true) {
+            this.nextStage = true;
+            for (var i = 0; i < this.managed.length; i++) {
+                this.managed[i].in(this.stage);
+            }
+        }
     }
-    collapse() {
-        this.nextStage = false;
+    _collapse() {
+        if (this.stage !== false) {
+            this.nextStage = false;
+            for (var i = 0; i < this.managed.length; i++) {
+                this.managed[i].out();
+            }
+        }
+    }
+
+    setScene(s) {
+        if (s !== this.stage) {
+            this.nextSceneId = s;
+            if (this.autoManage) {
+                this._collapse();
+            }
+        }
     }
 
     render() {
@@ -29,6 +50,21 @@ export class SceneControl extends Renderable {
         if (this.nextStage !== undefined && this.stageMatch) {
             this.stage = this.nextStage;
             this.nextStage = undefined;
+        }
+
+        if (this.autoManage) {
+
+            if (this.nextSceneId == undefined
+                && this.stage == false &&
+                this.stageMatch == true) {
+                this._visible();
+            }
+
+            //only switch when dark
+            if (this.nextSceneId !== undefined && this.nextSceneId != this.sceneId && this.stageMatch && this.stage == false) {
+                this.sceneId = this.nextSceneId;
+                this.nextSceneId = undefined;
+            }
         }
     }
 }
