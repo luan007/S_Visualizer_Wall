@@ -629,7 +629,6 @@ export class ParticleBackground extends THREERenderable {
 
             },
 
-
             //normal2
             () => {
 
@@ -643,18 +642,18 @@ export class ParticleBackground extends THREERenderable {
                 this.fade.params.enabled = true;
 
                 this.gravity.params.enabled = true;
-                this.gravity.params.g = -30;
-                this.gravity.params.clamp = 0.01;
+                this.gravity.params.g = -10;
+                this.gravity.params.clamp = 0.02;
                 this.gravity.params.point = [0, 0, -300];
                 this.damp.params.enabled = true;
                 this.damp.params.power = 0.97;
 
-                if (this.t >= 0.8) {
+                if (this.t >= 1.8) {
                     Shared.implode = true;
                 }
-                if (this.t >= 0.99) {
+                if (this.t >= 1.99) {
                     this.gravity.params.point = [0, 0, -400];
-                    this.gravity.params.g = -100000;
+                    this.gravity.params.g = -500000;
                     this.gravity.params.clamp = 100;
                 }
 
@@ -677,6 +676,51 @@ export class ParticleBackground extends THREERenderable {
                     });
                 }
 
+            },
+
+            //normal3
+            () => {
+
+                this.params.posZ.target = -500;
+                this.params.posZ.ease = 0.02;
+                this.params.simulationSpeedEase.target = 0.1;
+                this.params.simulationSpeed.target = 0;
+
+                this.target.params.enabled = false;
+                this.blink.params.enabled = true;
+                this.fade.params.enabled = true;
+
+                this.gravity.params.enabled = true;
+                this.gravity.params.g = 30000;
+                this.gravity.params.clamp = 1;
+                this.gravity.params.point = [0, 0, 0];
+                this.damp.params.enabled = true;
+                this.damp.params.power = 0.99;
+
+                if (this.t >= 2.8) {
+                    Shared.implode = true;
+                }
+                if (this.t >= 2.99) {
+                    this.gravity.params.point = [0, 0, -4];
+                    this.gravity.params.g = -500000;
+                    this.gravity.params.clamp = 1;
+                }
+
+                this.params.rotationSpeed.target = 1.0;
+                this.params.rotateX.target = -0.0003;
+                this.params.rotateY.target = 0.0002;
+
+                for (var i = 0; i < this.pSys.seek() && i < 100 * this.params.emissionRate.value; i++) {
+                    this.pSys.emit((pt) => {
+                        pt.l = 1;
+                        pt.vl = 0.003;
+                        pt.p = [1400 * (Math.random() - 0.5), 1 * (Math.random() - 0.5), 0];
+                        pt.c = [1, 1, 1];
+                        pt.v = [(0.5 - Math.random()) * 1, (0.5 - Math.random()) * 31, 0];
+                        pt.alpha = 0;
+                    });
+                }
+
             }
         ];
     }
@@ -685,7 +729,7 @@ export class ParticleBackground extends THREERenderable {
         var offset = 2;
         var length = this.configurations.length - offset
         this.setConfig(
-            3, //Math.floor(Math.random() * length) + offset
+            3//Math.floor(Math.random() * length) + offset
         )
     }
 
