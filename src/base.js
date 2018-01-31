@@ -227,7 +227,15 @@ export class SceneControl extends Renderable {
         this.stage = false;
         this.stageMatch = false;
         this.nextStage = undefined;
-        this.data = [1,2,3];
+        this.data = [
+            {
+                text: "#北京721双闪车队#",
+                numbers: [
+                    [712393, "测试数据"],
+                    [712393, "测试数据"]
+                ]
+            }
+        ];
         this.managed = [];
         this.autoManage = true;
     }

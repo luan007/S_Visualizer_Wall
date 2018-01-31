@@ -565,20 +565,28 @@ export class ParticleBackground extends THREERenderable {
                 this.params.rotateX.target = 0.0;
                 this.params.rotateY.target = 0.0;
 
-                if (this.t < 3) {
-                    for (var i = 0; i < this.pSys.seek() && i < 300 * this.params.emissionRate.value; i++) {
+
+                this.params.emissionRate.target = 1;
+                this.params.emissionRate.value = 1;
+
+                if (this.t > 1) {
+                    this.damp.params.power = 0.7
+                }
+
+                if (this.t < 2.6) {
+                    for (var i = 0; i < this.pSys.seek() && i < 500; i++) {
                         this.pSys.emit((pt) => {
                             pt.l = 1;
-                            pt.vl = 0.005;
+                            pt.vl = 0.006;
                             let deg = Math.random() * Math.PI * 2;
                             let r = Math.random();
                             pt.p = [1000 * (Math.random() - 0.5), 1 * (Math.random() - 0.5), 0];
                             pt.c = [1, 1, 1];
-                            pt.v = [0, Math.random() * 1000, Math.random() * 200];
+                            pt.v = [0, ((Math.random() - this.YOffset) * this.YFactor), Math.random() * 200];
                             pt.alpha = 0;
                         });
                     }
-                } else if (this.t > 5) {
+                } else if (this.t > 2.6) {
                     this.shuffleEffects();
                 }
             },
@@ -586,8 +594,9 @@ export class ParticleBackground extends THREERenderable {
             //normal
             () => {
 
+                console.log(1);
                 this.params.posZ.target = -500;
-                this.params.posZ.ease = 0.02;
+                this.params.posZ.ease = 0.005;
                 this.params.simulationSpeedEase.target = 0.2;
                 this.params.simulationSpeed.target = 0;
 
@@ -598,30 +607,31 @@ export class ParticleBackground extends THREERenderable {
                 this.fade.params.enabled = true;
 
                 this.gravity.params.enabled = true;
-                this.gravity.params.g = + Math.sin(this.t * 1.5) * 50000;
-                this.gravity.params.clamp = 1;
-                this.gravity.params.point = [0, 0, 100];
+                this.gravity.params.g = + Math.sin(this.t * 1.5) * 500;
+                this.gravity.params.clamp = 0.5;
+                this.damp.params.enabled = true;
+                this.damp.params.power = 0.95;
 
-                if (this.t >= 2.2) {
-                    this.gravity.params.g = -100000;
-                    this.gravity.params.clamp = 10;
+                this.gravity.params.point = [0, 0, 0];
+                if (this.t >= 1) {
+                    this.gravity.params.point = [0, 0, 10];
+                    this.gravity.params.g = -5000;
+                    this.gravity.params.clamp = 0.1;
                     Shared.implode = true;
                 }
 
-                this.damp.params.enabled = true;
-                this.damp.params.power = 0.99;
 
-                this.params.rotationSpeed.target = 1.0;
-                this.params.rotateX.target = 0.0003;
-                this.params.rotateY.target = 0.0007;
+                this.params.rotationSpeed.target = 0;
+                this.params.rotateX.target = 0;
+                this.params.rotateY.target = 0;
 
                 for (var i = 0; i < this.pSys.seek() && i < 300 * this.params.emissionRate.value; i++) {
                     this.pSys.emit((pt) => {
                         pt.l = 1;
-                        pt.vl = 0.006;
-                        pt.p = [0, 0, -100];
+                        pt.vl = 0.005;
+                        pt.p = [0, 0, 0];
                         pt.c = [1, 1, 1];
-                        pt.v = [(Math.random() - 0.5) * 35, (Math.random() - 0.5) * 35, 0];
+                        pt.v = [(Math.random() - 0.5) * 300, (Math.random() - 0.5) * 10, (Math.random() - 0.5) * 0.5];
                         pt.alpha = 0;
                     });
                 }
@@ -631,7 +641,7 @@ export class ParticleBackground extends THREERenderable {
 
             //normal2
             () => {
-
+                console.log(2);
                 this.params.posZ.target = -500;
                 this.params.posZ.ease = 0.02;
                 this.params.simulationSpeedEase.target = 0.2;
@@ -652,7 +662,7 @@ export class ParticleBackground extends THREERenderable {
                     Shared.implode = true;
                 }
                 if (this.t >= 1.99) {
-                    this.gravity.params.point = [0, 0, -400];
+                    this.gravity.params.point = [0, 0, -310];
                     this.gravity.params.g = -500000;
                     this.gravity.params.clamp = 100;
                 }
@@ -664,11 +674,11 @@ export class ParticleBackground extends THREERenderable {
                 for (var i = 0; i < this.pSys.seek() && i < 10000 * this.params.emissionRate.value; i++) {
                     this.pSys.emit((pt) => {
                         pt.l = 1;
-                        pt.vl = 0.003;
+                        pt.vl = 0.006;
                         let deg = Math.random() * Math.PI * 2;
                         let r = Math.random();
                         // pt.p = [(Math.random() - 0.5) * 200, -50, Math.random() * 400];
-                        pt.p = [Math.sin(deg) * r * 3, Math.cos(deg) * r * 3, - 300 + (Math.random() - 0.5) * 10];
+                        pt.p = [Math.sin(deg) * r * 30, Math.cos(deg) * r * 30, -300];
                         // pt.p = [Math.sin(deg) * r * 300, -45, Math.cos(deg) * r * 370];
                         pt.c = [1, 1, 1];
                         pt.v = [0, 0, 0];
@@ -680,8 +690,9 @@ export class ParticleBackground extends THREERenderable {
 
             //normal3
             () => {
+                console.log(3);
 
-                this.params.posZ.target = -500;
+                this.params.posZ.target = -100;
                 this.params.posZ.ease = 0.02;
                 this.params.simulationSpeedEase.target = 0.1;
                 this.params.simulationSpeed.target = 0;
@@ -702,8 +713,8 @@ export class ParticleBackground extends THREERenderable {
                 }
                 if (this.t >= 2.99) {
                     this.gravity.params.point = [0, 0, -4];
-                    this.gravity.params.g = -500000;
-                    this.gravity.params.clamp = 1;
+                    this.gravity.params.g = -50000;
+                    this.gravity.params.clamp = 0.6;
                 }
 
                 this.params.rotationSpeed.target = 1.0;
@@ -713,7 +724,7 @@ export class ParticleBackground extends THREERenderable {
                 for (var i = 0; i < this.pSys.seek() && i < 100 * this.params.emissionRate.value; i++) {
                     this.pSys.emit((pt) => {
                         pt.l = 1;
-                        pt.vl = 0.003;
+                        pt.vl = 0.006;
                         pt.p = [1400 * (Math.random() - 0.5), 1 * (Math.random() - 0.5), 0];
                         pt.c = [1, 1, 1];
                         pt.v = [(0.5 - Math.random()) * 1, (0.5 - Math.random()) * 31, 0];
@@ -726,18 +737,29 @@ export class ParticleBackground extends THREERenderable {
     }
 
     shuffleEffects() {
+        this.t = 0;
         var offset = 2;
         var length = this.configurations.length - offset
+        // this.setConfig(
+        //     o
+        // //  2 //   o
+        // )
+        var o = Math.floor(Math.random() * length) + offset;
+        while(o == this.last) {
+            o = Math.floor(Math.random() * length) + offset;;
+        }
+        this.last = o;
         this.setConfig(
-            3//Math.floor(Math.random() * length) + offset
+            o
         )
     }
 
     shuffleEntry() {
+        this.t = 0;
         var offset = 1;
         var length = 1
         this.setConfig(
-            3//Math.floor(Math.random() * length) + offset
+            Math.floor(Math.random() * length) + offset
         )
     }
 
@@ -774,6 +796,8 @@ export class ParticleBackground extends THREERenderable {
 
     in(t) {
         if (this.cacheState == true) return;
+        this.YFactor = Math.random() * 100;
+        this.YOffset = (Math.random() * 1 - 0.5);
         this.isVisible = true;
         this.cacheState = true;
 
@@ -784,6 +808,16 @@ export class ParticleBackground extends THREERenderable {
         this.params.simulationSpeed.target = 1;
         this.params.emissionRate.target = 1;
         this.params.emissionRate.value = 0;
+
+        this.params.rotateX.value = 0;
+        this.params.rotateY.value = 0;
+        this.params.rotateX.target = 0;
+        this.params.rotateY.target = 0;
+
+        this.renderer.mesh.rotation.x = 0;
+        this.renderer.mesh.rotation.y = 0;
+        this.renderer.mesh.rotation.z = 0;
+        this.renderer.mesh.rotation.w = 0;
     }
 
     out() {

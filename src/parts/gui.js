@@ -50,16 +50,21 @@ export class Title extends DOMRenderable {
     in(t) {
         if (this.cacheState == true) return;
         this.cacheState = true;
-        this.text = "{SCENE #" + t + "}";
+        this.text = t.text;
         this._implode_pending = true;
     }
 
     out() {
         if (this.cacheState == false) return;
-        this.cacheState = false;
-        this._implode_pending = false;
-        this.transition = true;
-        this.domElement.removeClass("show");
+        if (this.domElement.hasClass("show")) {
+            this.cacheState = false;
+            this._implode_pending = false;
+            this.transition = true;
+            this.domElement.removeClass("show");
+        } else {
+            this.isVisible = false;
+            this.transition = false;
+        }
     }
 
     _generateDom() {
@@ -107,3 +112,89 @@ export class Title extends DOMRenderable {
     }
 }
 
+
+export class AnyBlock extends DOMRenderable {
+    constructor() {
+        super();
+
+        this._implode_pending = false;
+
+        this.cacheState = false;
+        this.isVisible = false;
+        this.transition = false;
+        this.data = undefined;
+
+        this.domElement = $(
+            `<div></div>`
+        );
+        var later = 0;
+        this.domElement.on("transitionend", (e) => {
+            clearTimeout(later);
+            later = setTimeout(() => {
+                if (!this.domElement.hasClass("show")) {
+                    // visible, all good
+                    this.isVisible = false;
+                } else {
+                    this.isVisible = true;
+                }
+                this.transition = false;
+            }, 200);
+        });
+    }
+
+    in(t) {
+        if (this.cacheState == true) return;
+        this.cacheState = true;
+        this.data = t;
+        this._implode_pending = true;
+    }
+
+    out() {
+        if (this.cacheState == false) return;
+        if (this.domElement.hasClass("show")) {
+            this.cacheState = false;
+            this._implode_pending = false;
+            this.transition = true;
+            this.domElement.removeClass("show");
+        } else {
+            this.isVisible = false;
+            this.transition = false;
+        }
+    }
+
+    _generateDom() {
+        //reset!
+        for (var i = 0; i < this.domElement.children().length; i++) {
+            this.domElement.children[i].remove();
+        }
+        this.generateDom();
+        setTimeout(() => {
+            this.domElement.addClass("show");
+            this.transition = true;
+        }, 100);
+    }
+
+    generateDom() {
+        //TBD
+    }
+
+    render() {
+
+        if (Shared.implode && this._implode_pending) {
+            this._implode_pending = false;
+            this._generateDom();
+        }
+    }
+}
+
+
+export class Numbers extends AnyBlock {
+    constructor() {
+        super();
+        this.domElement.addClass("number-blocks");
+    }
+
+    generateDom() {
+        
+    }
+}
