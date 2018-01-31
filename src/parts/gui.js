@@ -19,6 +19,9 @@ export class FixedContainer extends DOMRenderable {
 export class Title extends DOMRenderable {
     constructor() {
         super();
+
+        this._implode_pending = false;
+
         this.cacheState = false;
         this.isVisible = false;
         this.transition = false;
@@ -48,12 +51,13 @@ export class Title extends DOMRenderable {
         if (this.cacheState == true) return;
         this.cacheState = true;
         this.text = "{SCENE #" + t + "}";
-        this._generateDom();
+        this._implode_pending = true;
     }
 
     out() {
         if (this.cacheState == false) return;
         this.cacheState = false;
+        this._implode_pending = false;
         this.transition = true;
         this.domElement.removeClass("show");
     }
@@ -77,6 +81,12 @@ export class Title extends DOMRenderable {
     }
 
     render() {
+
+        if (Shared.implode && this._implode_pending) {
+            this._implode_pending = false;
+            this._generateDom();
+        }
+
         for (var i = 0; i < this.textElements.length; i++) {
             this.textElements[i].css("opacity",
                 Math.sin(Shared.t * 1 * this.textElements[i].p) * 0.2 + 1);

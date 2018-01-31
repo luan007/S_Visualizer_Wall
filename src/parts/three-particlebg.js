@@ -426,9 +426,23 @@ export var StarSystem = BuildRenderable((group) => {
     };
 });
 
+
 export class ParticleBackground extends THREERenderable {
     constructor(e) {
+
         super(e);
+        this.curConfig = 2;
+
+        /**
+         *      this.target,
+                this.gravity,
+                this.damp,
+                this.velocity,
+                this.position,
+                this.fade,
+                this.blink
+         */
+
 
         //basis
         this.cacheState = false;
@@ -436,7 +450,11 @@ export class ParticleBackground extends THREERenderable {
         this.transition = false;
         //-basis
 
+        this.t = 0;
         this.params = {
+            simulationSpeedEase: {
+                value: 0, target: 1, ease: 0.0004
+            },
             simulationSpeed: {
                 value: 0, target: 1, ease: 0.05
             },
@@ -451,6 +469,9 @@ export class ParticleBackground extends THREERenderable {
             },
             emissionRate: {
                 value: 0, target: 500, ease: 0.5
+            },
+            posZ: {
+                value: 0, target: -500, ease: 0.1
             }
         };
 
@@ -465,7 +486,7 @@ export class ParticleBackground extends THREERenderable {
         this.fade = new pFadeBehavior({ enabled: true, phase: 'life', curve: 8 });
         this.renderer = new pPointsRenderer({ size: 30000, enabled: true });
 
-        this.renderer.mesh.translateZ(-500);
+        // this.renderer.mesh.translateZ(-500);
 
         this.renderer.material.sizeAttenuation = true;
         this.renderer.material.size = 4;
@@ -485,44 +506,256 @@ export class ParticleBackground extends THREERenderable {
             [
                 this.renderer
             ]);
+
+        this.configurations = [
+            //special configuration / exit.
+            () => {
+
+                this.params.posZ.target = -500;
+                this.params.posZ.ease = 0.01;
+
+                this.target.params.enabled = false;
+
+                this.blink.params.enabled = true;
+
+                this.fade.params.enabled = true;
+
+                this.gravity.params.enabled = false;
+
+                this.damp.params.enabled = true;
+                this.damp.params.power = 0.99;
+
+                this.params.rotationSpeed.target = 1;
+                this.params.rotateX.target = 0.002;
+                this.params.rotateY.target = 0.001;
+
+            },
+
+            //hash1
+            () => {
+
+                // this.params.simulationSpeedEase.target = 0.1;
+                // this.params.simulationSpeed.target = 0;
+
+                this.params.posZ.target = -100;
+                this.params.posZ.ease = 0.01;
+
+                this.target.params.enabled = true;
+                this.target.params.power = 1;
+                this.target.params.powerColor = 1;
+                this.target.params.clamp = this.t;
+                this.target.params.shift = [0, 0, this.t * 0.1];
+                this.blink.params.enabled = true;
+
+                this.fade.params.enabled = true;
+
+                this.gravity.params.enabled = true;
+                this.gravity.params.g = 300000;
+                this.gravity.params.point = [0, 0, -300];
+                this.gravity.params.clamp = this.t;
+
+                // if(this.t >= 1.2) {
+                // this.gravity.params.enabled = false;
+                // }
+
+                this.damp.params.enabled = true;
+                this.damp.params.power = 0.6;
+
+                this.params.rotationSpeed.target = 0;
+                this.params.rotateX.target = 0.0;
+                this.params.rotateY.target = 0.0;
+
+                if (this.t < 3) {
+                    for (var i = 0; i < this.pSys.seek() && i < 300 * this.params.emissionRate.value; i++) {
+                        this.pSys.emit((pt) => {
+                            pt.l = 1;
+                            pt.vl = 0.005;
+                            let deg = Math.random() * Math.PI * 2;
+                            let r = Math.random();
+                            pt.p = [1000 * (Math.random() - 0.5), 1 * (Math.random() - 0.5), 0];
+                            pt.c = [1, 1, 1];
+                            pt.v = [0, Math.random() * 1000, Math.random() * 200];
+                            pt.alpha = 0;
+                        });
+                    }
+                } else if (this.t > 5) {
+                    this.shuffleEffects();
+                }
+            },
+
+            //hash2
+            () => {
+
+                // this.params.simulationSpeedEase.target = 0.1;
+                // this.params.simulationSpeed.target = 0;
+
+                this.params.posZ.target = -100;
+                this.params.posZ.ease = 0.01;
+
+                this.target.params.enabled = true;
+                this.target.params.power = 1;
+                this.target.params.powerColor = 1;
+                this.target.params.clamp = this.t;
+                this.target.params.shift = [0, 0, this.t * 0.1];
+                this.blink.params.enabled = true;
+
+                this.fade.params.enabled = true;
+
+                this.gravity.params.enabled = true;
+                this.gravity.params.g = 300000;
+                this.gravity.params.point = [0, 0, -300];
+                this.gravity.params.clamp = this.t;
+
+                // if(this.t >= 1.2) {
+                // this.gravity.params.enabled = false;
+                // }
+
+                this.damp.params.enabled = true;
+                this.damp.params.power = 0.6;
+
+                this.params.rotationSpeed.target = 0;
+                this.params.rotateX.target = 0.0;
+                this.params.rotateY.target = 0.0;
+
+                if (this.t < 3) {
+                    for (var i = 0; i < this.pSys.seek() && i < 300 * this.params.emissionRate.value; i++) {
+                        this.pSys.emit((pt) => {
+                            pt.l = 1;
+                            pt.vl = 0.005;
+                            let deg = Math.random() * Math.PI * 2;
+                            let r = Math.random();
+                            pt.p = [1000 * (Math.random() - 0.5), 1 * (Math.random() - 0.5), 0];
+                            pt.c = [1, 1, 1];
+                            pt.v = [0, Math.random() * 1000, Math.random() * 200];
+                            pt.alpha = 0;
+                        });
+                    }
+                } else if (this.t > 5) {
+                    this.shuffleEffects();
+                }
+            },
+
+
+
+            //normal
+            () => {
+
+                this.params.posZ.target = -500;
+                this.params.posZ.ease = 0.02;
+                this.params.simulationSpeedEase.target = 0.2;
+                this.params.simulationSpeed.target = 0;
+
+                this.target.params.enabled = false;
+
+                this.blink.params.enabled = true;
+
+                this.fade.params.enabled = true;
+
+                this.gravity.params.enabled = true;
+                this.gravity.params.g = + Math.sin(this.t * 1.5) * 50000;
+                this.gravity.params.clamp = 1;
+                this.gravity.params.point = [0, 0, 100];
+
+                if (this.t >= 2.2) {
+                    this.gravity.params.g = -100000;
+                    this.gravity.params.clamp = 10;
+                    Shared.implode = true;
+                }
+
+                this.damp.params.enabled = true;
+                this.damp.params.power = 0.99;
+
+                this.params.rotationSpeed.target = 1.0;
+                this.params.rotateX.target = 0.0003;
+                this.params.rotateY.target = 0.0007;
+
+                for (var i = 0; i < this.pSys.seek() && i < 300 * this.params.emissionRate.value; i++) {
+                    this.pSys.emit((pt) => {
+                        pt.l = 1;
+                        pt.vl = 0.006;
+                        pt.p = [0, 0, -100];
+                        pt.c = [1, 1, 1];
+                        pt.v = [(Math.random() - 0.5) * 35, (Math.random() - 0.5) * 35, 0];
+                        pt.alpha = 0;
+                    });
+                }
+
+
+            }
+        ];
+    }
+
+    shuffleEffects() {
+        var offset = 2;
+        var length = this.configurations.length - offset
+        this.setConfig(
+            Math.floor(Math.random() * length) + offset
+        )
+    }
+
+    shuffleEntry() {
+        var offset = 1;
+        var length = 1
+        this.setConfig(
+            Math.floor(Math.random() * length) + offset
+        )
     }
 
     render() {
+
+        Shared.implode = false;
+
+        this.t += 0.01;
+        this.configurations[this.curConfig] && this.configurations[this.curConfig]();
+
         easeAll(this.params);
+
+        this.renderer.mesh.position.z = this.params.posZ.value;
         this.renderer.mesh.rotateX(this.params.rotateX.value * this.params.rotationSpeed.value);
         this.renderer.mesh.rotateY(this.params.rotateY.value * this.params.rotationSpeed.value);
-
-        for (var i = 0; i < Math.abs(Math.sin(Shared.t)) * this.params.emissionRate.value && i < this.pSys.seek(); i++) {
-            this.pSys.emit((pt) => {
-                pt.l = 1;
-                pt.vl = 0.006;
-                let deg = Math.random() * Math.PI * 2;
-                let r = Math.random();
-                pt.p = [(Math.random() - 0.5) * 200, -50, Math.random() * 400];
-                pt.p = [Math.sin(deg) * r * 3, Math.cos(deg) * r * 3, - 300 + (Math.random() - 0.5) * 10];
-                // pt.p = [Math.sin(deg) * r * 300, -45, Math.cos(deg) * r * 370];
-                pt.p = [0, 0, -100];
-                pt.c = [1, 1, 1];
-                pt.v = [(Math.random() - 0.5) * 35, (Math.random() - 0.5) * 35, 0];
-                pt.alpha = 0;
-            });
-        }
-
+        this.params.simulationSpeed.ease = this.params.simulationSpeedEase.value;
         this.pSys.update(this.params.simulationSpeed.value);
         this.pSys.render();
+
+
+        if (!this.cacheState && this.pSys.available.length == 30000) {
+            this.isVisible = false;
+            this.transition = false;
+            this.renderer.mesh.rotation.x = 0;
+            this.renderer.mesh.rotation.y = 0;
+            this.renderer.mesh.rotation.translateZ = 0;
+        }
     }
 
+    setConfig(j) {
+        this.t = 0;
+        this.curConfig = j;
+    }
 
     in(t) {
         if (this.cacheState == true) return;
+        this.isVisible = true;
         this.cacheState = true;
+
+        this.shuffleEntry();
+        this.params.simulationSpeedEase.value = 0;
+        this.params.simulationSpeedEase.target = 0;
+        this.params.simulationSpeed.value = 1;
+        this.params.simulationSpeed.target = 1;
+        this.params.emissionRate.target = 1;
+        this.params.emissionRate.value = 0;
     }
 
     out() {
         if (this.cacheState == false) return;
         this.cacheState = false;
         this.transition = true;
-        this.domElement.removeClass("show");
+        this.params.simulationSpeed.target = 0.7;
+        this.params.simulationSpeedEase.target = 0.01;
+        this.params.emissionRate.target = 0;
+
+        this.setConfig(0);
+        // this.domElement.removeClass("show");
     }
 
 

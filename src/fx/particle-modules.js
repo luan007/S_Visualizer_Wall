@@ -230,6 +230,7 @@ export class pTargetBehavior extends pBehavior {
         super(params);
         this.params.power = this.params.power || 0.03;
         this.params.clamp = this.params.clamp || 10;
+        this.params.shift = this.params.shift || [0, 0, 0];
         this.target = [];
         this.targetColor = [];
     }
@@ -256,7 +257,7 @@ export class pTargetBehavior extends pBehavior {
                 var alpha = data[(y * canvas.width + x) * 4 + 3];
                 if (alpha > 0) {
                     // console.log(alpha);
-                    this.target.push([x - canvas.width / 2, canvas.height / 2 - y, -300]);
+                    this.target.push([x - canvas.width / 2, canvas.height / 2 - y, 0]);
                     // this.targetColor.push([((x + y) / 100) % 0.3, ((x + y) / 300) % 1, alpha]);
                     this.targetColor.push([1, 1, 1]);
                     q++;
@@ -278,13 +279,15 @@ export class pTargetBehavior extends pBehavior {
             pt.bag.hasTarget = false;
         } else {
             pt.bag.hasTarget = true;
-            pt.bag.target = this.target[i % this.target.length];
+            pt.bag.target = [0, 0, 0];
+            pt.bag.target = glmat.vec3.add(pt.bag.target, this.params.shift, this.target[i % this.target.length]);
             pt.bag.targetColor = this.targetColor[i % this.targetColor.length];
         }
     }
 
     onUpdate(pt, i, t) {
         if (!pt.bag.hasTarget) return;
+        pt.bag.tmp = pt.bag.tmp || [0, 0, 0];
         // glmat.vec3.lerp(pt.a, pt.p, pt.bag.target, this.params.power);
         glmat.vec3.sub(pt.a, pt.bag.target, pt.p);
         var len = glmat.vec3.len(pt.a) * this.params.power;
@@ -303,9 +306,9 @@ export class pTargetBehavior extends pBehavior {
         // pt.a[1] += (pt.bag.target[1] - pt.p[1]) * this.params.power;
         // pt.a[2] += (pt.bag.target[2] - pt.p[2]) * this.params.power;
 
-        pt.c[0] += (pt.bag.targetColor[0] - pt.c[0]) * this.params.powerColor;
-        pt.c[1] += (pt.bag.targetColor[1] - pt.c[1]) * this.params.powerColor;
-        pt.c[2] += (pt.bag.targetColor[2] - pt.c[2]) * this.params.powerColor;
+        // pt.c[0] += (pt.bag.targetColor[0] - pt.c[0]) * this.params.powerColor;
+        // pt.c[1] += (pt.bag.targetColor[1] - pt.c[1]) * this.params.powerColor;
+        // pt.c[2] += (pt.bag.targetColor[2] - pt.c[2]) * this.params.powerColor;
 
     }
 }
@@ -411,11 +414,15 @@ export class pGravityBehavior extends pBehavior {
         params.clamp = params.clamp || 0.05;
     }
     onUpdate(pt, i, t) {
-        glmat.vec3.sub(pt.a, pt.p, pt.bag.attractor || this.params.point);
-        var rd = 1 / Math.max(1, glmat.vec3.squaredLength(pt.a));
-        pt.a = glmat.vec3.scale(pt.a,
-            glmat.vec3.normalize(pt.a, pt.a),
+        pt.abk = pt.abk || [0, 0, 0] ;
+        glmat.vec3.sub(pt.abk, pt.p, pt.bag.attractor || this.params.point);
+        var rd = 1 / Math.max(1, glmat.vec3.squaredLength(pt.abk));
+
+        pt.abk = glmat.vec3.scale(pt.abk,
+            glmat.vec3.normalize(pt.abk, pt.abk),
             -Math.min(this.params.g * rd, this.params.clamp)
         );
+
+        pt.a = glmat.vec3.add(pt.a, pt.a, pt.abk);
     }
 }
