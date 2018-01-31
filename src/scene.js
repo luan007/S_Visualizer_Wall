@@ -6,8 +6,9 @@ import * as GUI from "./parts/gui.js";
 
 //THREE
 var ThreeRenderTarget = new THREE_TARGET.THREERenderTarget();
-ThreeRenderTarget.add(THREE_TARGET.WaveSystem);
-
+var ParticleBG = new THREE_TARGET.ParticleBackground();
+ThreeRenderTarget.add(ParticleBG);
+window.ParticleBG = ParticleBG;
 //DOM
 var DOMContainer = new GUI.FixedContainer();
 DOMContainer.domElement.appendTo($(document.body));
@@ -17,6 +18,7 @@ DOMContainer.add(title);
 //Logic
 var Scene = new SceneControl();
 Scene.managed.push(title);
+Scene.managed.push(ParticleBG);
 
 window.scene = Scene;
 

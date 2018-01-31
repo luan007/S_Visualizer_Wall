@@ -88,7 +88,7 @@ export class pSys {
         for (var i = 0; i < this.ps.length; i++) {
             let pt = this.ps[i];
             if (pt._dead) continue;
-            pt.l -= t;
+            pt.l -= pt.vl * t;
             if (pt.l <= 0) {
                 pt._dead = true;
                 this.available.push(i);

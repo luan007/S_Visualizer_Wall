@@ -195,7 +195,7 @@ export class SlideEase extends Renderable {
     constructor() {
         super();
         this.v = 0;
-        this.target = 0;
+        this.target = 1;
         this.factor = 0.05;
     }
 

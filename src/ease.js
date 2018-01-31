@@ -8,6 +8,12 @@ const EASE_DEFAULT_STEP = 0.1;
 const EASE_PREC = 0.001; //+/-
 const EASE_POWER = 0;
 
+export function easeAll(objOrArray) {
+    for (var i in objOrArray) {
+        ease(objOrArray[i]);
+    }
+}
+
 export function ease(val) {
     //returns delta
     val.value = val.value == undefined ? 0 : val.value;

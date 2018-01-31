@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import { Renderable, THREERenderable, Shared, BuildRenderable } from "../base.js";
+import { Renderable, THREERenderable, BuildRenderable } from "../base.js";
+import { Shared } from "../env.js";
 import { pSys, pBehavior, pRenderer } from "./particles.js";
 import * as glmat from "gl-matrix";
 
@@ -33,7 +34,7 @@ export class pPointsRenderer extends pRenderer {
         var texture = new THREE.ImageUtils.loadTexture("../assets/Dot.png");
         this.material = new THREE.PointsMaterial({
             vertexColors: true,
-            size: 5,
+            size:5,
             transparent: true,
             // opacity: 1,
             // alphaTest: 0.5,
@@ -221,7 +222,7 @@ export class pDragLineRenderer extends pRenderer {
         // this.a *= 0.93;
         // this.a = this.a < 0.001 ? 0.001 : this.a;
     }
-} 
+}
 
 export class pTargetBehavior extends pBehavior {
 
@@ -372,10 +373,10 @@ export class pBlinkBehavior extends pBehavior {
     onUpdate(pt, i, t) {
         var a = Math.sin((i / 100 + Shared.t * 10));
         pt.c[0] = pt.c[1] = pt.c[2] = a * a * 0.8;
-        if(pt.p[2] > 10 && pt.p[2] < 85) {
+        if (pt.p[2] > 10 && pt.p[2] < 85) {
             // pt.c[1] = pt.c[2] = 1;
             // pt.c[0] = 1;
-            
+
         }
     }
 }
@@ -385,6 +386,7 @@ export class pFadeBehavior extends pBehavior {
         super(params);
         params.speed = params.speed || 0.1;
         params.phase = params.phase || "in";
+        params.curve = 2;
     }
     onUpdate(pt, i, t) {
         if (this.params.phase == "in") {
@@ -395,6 +397,8 @@ export class pFadeBehavior extends pBehavior {
             if (pt.alpha > 0) {
                 pt.alpha -= (pt.alpha) * this.params.speed;
             }
+        } else if (this.params.phase == "life") {
+                pt.alpha = 1 - Math.pow(2 * pt.l - 1, this.params.curve);
         }
     }
 }
@@ -408,7 +412,7 @@ export class pGravityBehavior extends pBehavior {
     }
     onUpdate(pt, i, t) {
         glmat.vec3.sub(pt.a, pt.p, pt.bag.attractor || this.params.point);
-        var rd = 1 / Math.max(10, glmat.vec3.squaredLength(pt.a));
+        var rd = 1 / Math.max(1, glmat.vec3.squaredLength(pt.a));
         pt.a = glmat.vec3.scale(pt.a,
             glmat.vec3.normalize(pt.a, pt.a),
             -Math.min(this.params.g * rd, this.params.clamp)
