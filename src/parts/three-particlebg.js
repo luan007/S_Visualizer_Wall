@@ -431,7 +431,7 @@ export class ParticleBackground extends THREERenderable {
     constructor(e) {
 
         super(e);
-        this.curConfig = 2;
+        this.curConfig = 3;
 
         /**
          *      this.target,
@@ -583,60 +583,6 @@ export class ParticleBackground extends THREERenderable {
                 }
             },
 
-            //hash2
-            () => {
-
-                // this.params.simulationSpeedEase.target = 0.1;
-                // this.params.simulationSpeed.target = 0;
-
-                this.params.posZ.target = -100;
-                this.params.posZ.ease = 0.01;
-
-                this.target.params.enabled = true;
-                this.target.params.power = 1;
-                this.target.params.powerColor = 1;
-                this.target.params.clamp = this.t;
-                this.target.params.shift = [0, 0, this.t * 0.1];
-                this.blink.params.enabled = true;
-
-                this.fade.params.enabled = true;
-
-                this.gravity.params.enabled = true;
-                this.gravity.params.g = 300000;
-                this.gravity.params.point = [0, 0, -300];
-                this.gravity.params.clamp = this.t;
-
-                // if(this.t >= 1.2) {
-                // this.gravity.params.enabled = false;
-                // }
-
-                this.damp.params.enabled = true;
-                this.damp.params.power = 0.6;
-
-                this.params.rotationSpeed.target = 0;
-                this.params.rotateX.target = 0.0;
-                this.params.rotateY.target = 0.0;
-
-                if (this.t < 3) {
-                    for (var i = 0; i < this.pSys.seek() && i < 300 * this.params.emissionRate.value; i++) {
-                        this.pSys.emit((pt) => {
-                            pt.l = 1;
-                            pt.vl = 0.005;
-                            let deg = Math.random() * Math.PI * 2;
-                            let r = Math.random();
-                            pt.p = [1000 * (Math.random() - 0.5), 1 * (Math.random() - 0.5), 0];
-                            pt.c = [1, 1, 1];
-                            pt.v = [0, Math.random() * 1000, Math.random() * 200];
-                            pt.alpha = 0;
-                        });
-                    }
-                } else if (this.t > 5) {
-                    this.shuffleEffects();
-                }
-            },
-
-
-
             //normal
             () => {
 
@@ -681,6 +627,56 @@ export class ParticleBackground extends THREERenderable {
                 }
 
 
+            },
+
+
+            //normal2
+            () => {
+
+                this.params.posZ.target = -500;
+                this.params.posZ.ease = 0.02;
+                this.params.simulationSpeedEase.target = 0.2;
+                this.params.simulationSpeed.target = 0;
+
+                this.target.params.enabled = false;
+                this.blink.params.enabled = true;
+                this.fade.params.enabled = true;
+
+                this.gravity.params.enabled = true;
+                this.gravity.params.g = -30;
+                this.gravity.params.clamp = 0.01;
+                this.gravity.params.point = [0, 0, -300];
+                this.damp.params.enabled = true;
+                this.damp.params.power = 0.97;
+
+                if (this.t >= 0.8) {
+                    Shared.implode = true;
+                }
+                if (this.t >= 0.99) {
+                    this.gravity.params.point = [0, 0, -400];
+                    this.gravity.params.g = -100000;
+                    this.gravity.params.clamp = 100;
+                }
+
+                this.params.rotationSpeed.target = 1.0;
+                this.params.rotateX.target = -0.0003;
+                this.params.rotateY.target = 0.0002;
+
+                for (var i = 0; i < this.pSys.seek() && i < 10000 * this.params.emissionRate.value; i++) {
+                    this.pSys.emit((pt) => {
+                        pt.l = 1;
+                        pt.vl = 0.003;
+                        let deg = Math.random() * Math.PI * 2;
+                        let r = Math.random();
+                        // pt.p = [(Math.random() - 0.5) * 200, -50, Math.random() * 400];
+                        pt.p = [Math.sin(deg) * r * 3, Math.cos(deg) * r * 3, - 300 + (Math.random() - 0.5) * 10];
+                        // pt.p = [Math.sin(deg) * r * 300, -45, Math.cos(deg) * r * 370];
+                        pt.c = [1, 1, 1];
+                        pt.v = [0, 0, 0];
+                        pt.alpha = 0;
+                    });
+                }
+
             }
         ];
     }
@@ -689,7 +685,7 @@ export class ParticleBackground extends THREERenderable {
         var offset = 2;
         var length = this.configurations.length - offset
         this.setConfig(
-            Math.floor(Math.random() * length) + offset
+            3, //Math.floor(Math.random() * length) + offset
         )
     }
 
@@ -697,7 +693,7 @@ export class ParticleBackground extends THREERenderable {
         var offset = 1;
         var length = 1
         this.setConfig(
-            Math.floor(Math.random() * length) + offset
+            3//Math.floor(Math.random() * length) + offset
         )
     }
 
