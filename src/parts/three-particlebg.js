@@ -491,7 +491,7 @@ export class ParticleBackground extends THREERenderable {
         // this.renderer.mesh.translateZ(-500);
 
         this.renderer.material.sizeAttenuation = true;
-        this.renderer.material.size = 3;
+        this.renderer.material.size = 4;
         this.renderer.material.map = THREE.ImageUtils.loadTexture("/assets/Dot.png");
         this.group.add(this.renderer.mesh);
 
@@ -552,7 +552,7 @@ export class ParticleBackground extends THREERenderable {
 
                 this.fade.params.enabled = true;
 
-                this.gravity.params.enabled = true;
+                this.gravity.params.enabled = false;
                 this.gravity.params.g = 3000;
                 this.gravity.params.point = [0, 0, -300];
                 this.gravity.params.clamp = 2.1;
@@ -562,7 +562,7 @@ export class ParticleBackground extends THREERenderable {
                 // }
 
                 this.damp.params.enabled = true;
-                this.damp.params.power = 0.6;
+                this.damp.params.power = 0.9;
 
                 this.params.rotationSpeed.target = 0;
                 this.params.rotateX.target = 0.0;
@@ -572,13 +572,13 @@ export class ParticleBackground extends THREERenderable {
                 this.params.emissionRate.target = 1;
                 this.params.emissionRate.value = 1;
 
-                if (this.t > 2) {
+                if (this.t > 2.3) {
                     this.target.params.enabled = false;
                     this.damp.params.power = 0.9
                 }
 
                 if (this.t < 2.6) {
-                    for (var i = 0; i < this.pSys.seek() && i < 500; i++) {
+                    for (var i = 0; this.pSys.available.length > this.size / 3 && i < 1000; i++) {
                         this.pSys.emit((pt) => {
                             pt.l = 1;
                             pt.vl = 0.0001;
@@ -586,7 +586,7 @@ export class ParticleBackground extends THREERenderable {
                             let r = Math.random();
                             pt.p = [1000 * (Math.random() - 0.5), 1 * (Math.random() - 0.5), 0];
                             pt.c = [1, 1, 1];
-                            pt.v = [0, ((Math.random() - this.YOffset) * this.YFactor), Math.random() * 200];
+                            pt.v = [(Math.random() * 0.5 - 1) * 10, ((Math.random() - this.YOffset) * this.YFactor), Math.random() * 200];
                             pt.alpha = 0;
                         });
                     }
@@ -692,7 +692,6 @@ export class ParticleBackground extends THREERenderable {
 
             //normal3
             () => {
-                console.log(3);
 
                 this.params.posZ.target = -300;
                 this.params.posZ.ease = 0.02;
@@ -704,19 +703,19 @@ export class ParticleBackground extends THREERenderable {
                 this.fade.params.enabled = true;
 
                 this.gravity.params.enabled = true;
-                this.gravity.params.g = 30000;
-                this.gravity.params.clamp = 1;
+                this.gravity.params.g = 3500;
+                this.gravity.params.clamp = 0.3;
                 this.gravity.params.point = [0, 0, 0];
                 this.damp.params.enabled = true;
-                this.damp.params.power = 0.99;
+                this.damp.params.power = 0.98;
 
-                if (this.t >= 2.8) {
+                if (this.t >= 1.8) {
                     Shared.implode = true;
                 }
-                if (this.t >= 2.99) {
-                    this.gravity.params.point = [0, 0, -4];
-                    this.gravity.params.g = -50000;
-                    this.gravity.params.clamp = 0.6;
+                if (this.t >= 1.99) {
+                    this.gravity.params.point = [0, 0, 0];
+                    this.gravity.params.g = -590;
+                    this.gravity.params.clamp = 0.003;
                 }
 
                 this.params.rotationSpeed.target = 1.0;
@@ -742,10 +741,10 @@ export class ParticleBackground extends THREERenderable {
         this.t = 0;
         var offset = 2;
         var length = this.configurations.length - offset
-        // this.setConfig(
-        //     o
-        // //  2 //   o
-        // )
+        return this.setConfig(
+            4
+        //  2 //   o
+        )
         var o = Math.floor(Math.random() * length) + offset;
         while(o == this.last) {
             o = Math.floor(Math.random() * length) + offset;;

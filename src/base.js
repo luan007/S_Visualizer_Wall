@@ -279,6 +279,7 @@ export class SceneControl extends Renderable {
             for (var i = 0; i < this.managed.length; i++) {
                 if (this.managed[i].isVisible !== this.nextStage || this.managed[i].transition) {
                     this.stageMatch = false;
+                    console.log(this.managed[i])
                     break;
                 }
             }
