@@ -15,14 +15,21 @@ DOMContainer.domElement.appendTo($(document.body));
 var title = new GUI.Title();
 DOMContainer.add(title);
 
+var numbers = new GUI.Numbers();
+DOMContainer.add(numbers);
+
+var bgCanvas = new GUI.AvatarWall();
+
 //Logic
 var Scene = new SceneControl();
 Scene.managed.push(title);
+Scene.managed.push(numbers);
 Scene.managed.push(ParticleBG);
+Scene.managed.push(bgCanvas);
 
 window.scene = Scene;
 
-var root = new Renderable([Scene, ThreeRenderTarget, DOMContainer]);
+var root = new Renderable([Scene, ThreeRenderTarget, DOMContainer, bgCanvas]);
 export function update() {
     root.update();
 }

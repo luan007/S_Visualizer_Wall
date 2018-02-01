@@ -1,5 +1,61 @@
 @px: (100 / 3240) * 1vw;
 
+
+.number-blocks {
+    position: fixed;
+    display: flex;
+    justify-content:  center;
+    font-weight: lighter;
+    top: 430 * @px;
+    left: 10vw;
+    right: 10vw;
+    text-align: center;
+    transform: translate(0, 120 * @px);
+    color: white;
+
+    .block {
+        // flex-grow: 1;
+        min-width: 15vw;
+        opacity: 0;
+        filter: blur(10px);
+        transform: translate(0, 30 * @px);
+        background: rgba(255,255,255,0.0);
+        padding-bottom: 10*@px;
+        margin: 0 20 * @px;
+        font-family: 'DIN';
+        font-kerning: normal;
+        letter-spacing: 5 * @px;
+        font-size: 70 * @px;
+        text-shadow: 0.01vw 0.07vw #9c9c9c;
+
+        span {
+            vertical-align: middle;
+            // background: red;
+        }
+        
+        .block-title {
+            letter-spacing: 9 * @px;
+            font-kerning: normal;
+            text-shadow: none;
+            font-family: 'DIN', 'PingFang SC';
+            font-weight: bold;
+            font-size: 17 * @px;
+            opacity: 0.5;
+        }
+    }
+}
+
+.number-blocks.show {
+    .block {
+        transition: 3.5s all ease;
+        opacity: 1;
+        filter: blur(0px);
+        transform: translate(0, 0);
+        background: rgba(255,255,255,0.01);
+    }
+}
+
+
 .gui-title.show > span {
     margin-left: 40 * @px;
     margin-right: 40 * @px;

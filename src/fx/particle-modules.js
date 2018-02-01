@@ -373,14 +373,15 @@ export class pBlinkBehavior extends pBehavior {
         super(params);
     }
 
-    onUpdate(pt, i, t) {
-        var a = Math.sin((i / 100 + Shared.t * 10));
-        pt.c[0] = pt.c[1] = pt.c[2] = a * a * 0.8;
-        if (pt.p[2] > 10 && pt.p[2] < 85) {
-            // pt.c[1] = pt.c[2] = 1;
-            // pt.c[0] = 1;
+    onEmit(pt) {
+        pt.bag.blinkSpeed = Math.random() * 10 + 1;
+        pt.bag.blinkOffset = Math.random() * 2;
+    }
 
-        }
+    onUpdate(pt, i, t) {
+        // var a = Math.sin((Shared.t * 10 + i / 100));
+        var a = Math.abs(((Shared.t * pt.bag.blinkSpeed + pt.bag.blinkOffset) % 2) - 1);
+        pt.c[0] = pt.c[1] = pt.c[2] = a * a * 0.8 + 0.2;
     }
 }
 
@@ -401,7 +402,7 @@ export class pFadeBehavior extends pBehavior {
                 pt.alpha -= (pt.alpha) * this.params.speed;
             }
         } else if (this.params.phase == "life") {
-                pt.alpha = 1 - Math.pow(2 * pt.l - 1, this.params.curve);
+                pt.alpha = (1 - Math.pow(2 * pt.l - 1, this.params.curve)) * 10;
         }
     }
 }

@@ -231,8 +231,16 @@ export class SceneControl extends Renderable {
             {
                 text: "#北京721双闪车队#",
                 numbers: [
-                    [712393, "测试数据"],
-                    [712393, "测试数据"]
+                    ["VIEWS / 话题阅读量", 56.8, "亿"],
+                    ["PARTICIPANTS / 话题讨论量", 868.6, "万"],
+                ]
+            },
+
+            {
+                text: "#北京721双闪车队#",
+                numbers: [
+                    ["VIEWS / 话题阅读量", 56.8, "亿"],
+                    ["PARTICIPANTS / 话题讨论量", 868.6, "万"],
                 ]
             }
         ];
