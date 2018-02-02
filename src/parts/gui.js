@@ -73,8 +73,6 @@ export class WeiboFloaterManager extends DOMRenderable {
     }
 }
 
-
-
 export class Title extends DOMRenderable {
     constructor() {
         super();
@@ -170,7 +168,6 @@ export class Title extends DOMRenderable {
         // }
     }
 }
-
 
 export class AnyBlock extends DOMRenderable {
     constructor() {
@@ -500,8 +497,8 @@ export class Explainer extends AnyBlock {
 
         if (this.data && this.data.explaination) {
             this.domElement.css({
-                top: 10 + "vh",
-                left: 10 + "vh"
+                top: 4 + "vw",
+                left: 3 + "vw"
             });
 
             this.typer = new TypeIt(this.dom_typer, {
@@ -516,5 +513,9 @@ export class Explainer extends AnyBlock {
         }
         this.transition = false;
     }
+
+}
+
+export class DataFloater extends DOMRenderable {
 
 }
