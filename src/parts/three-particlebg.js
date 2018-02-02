@@ -1,8 +1,10 @@
 import { THREERenderable, BuildRenderable, Renderable, SlideEase } from "../base.js"
 import { ease, remap, easeAll } from "../ease.js"
 import { Shared } from "../env.js"
-import * as DOMFx from "../fx/dom.js";
+import * as GUI from "./gui.js";
 import * as THREE from "three";
+
+
 
 import {
     pBlinkBehavior, pDampingBehavior, pDragLineRenderer, pFadeBehavior,
@@ -31,6 +33,7 @@ export class THREERenderTarget extends THREERenderable {
             1,
             5000
         );
+        Shared.camera = this.camera;
         this.camera.position.z = 500;
         this.scene = new THREE.Scene();
         this.scene.fog = new THREE.Fog(0x000, 1, 20000);
@@ -41,390 +44,50 @@ export class THREERenderTarget extends THREERenderable {
     }
 }
 
-// var T = new SlideEase();
-// window.T = T;
 
-// export var EveryGoingTarget = BuildRenderable((group) => {
-//     var target = new pTargetBehavior({ enabled: true, power: 10.1, powerColor: 0.1, clamp: .5 });
-//     target.generateDemoTarget("#");
+export class pDomRenderer extends pRenderer {
+    constructor(params) {
+        super(params);
+        this.manager = params.manager || new GUI.WeiboFloaterManager(params.size || 100);
+        this.floaters = this.manager.floaters;
+        this.params.chance = this.params.chance || { target: 0.99, value: 0, ease: 0.1 };
+        this.params.matrixWorld = new THREE.Matrix4();
+    }
+    onRender(sys) {
+        ease(this.params.chance);
+        for (var i = 0; i < sys.ps.length; i++) {
+            let c = sys.ps[i];
+            if (c._dead) continue;
 
-//     var gravity = new pGravityBehavior({ eanbled: true, g: 300000, clamp: 0.03 });
-//     var velocity = new pMoveBehavior({ enabled: true, stage: "velocity" });
-//     var damp = new pDampingBehavior({ enabled: true, power: 0.9 });
-//     var position = new pMoveBehavior({ enabled: true, stage: "position" });
-//     var blink = new pBlinkBehavior({ enabled: true });
-//     var fade = new pFadeBehavior({ enabled: true, phase: 'life', curve: 8 });
-//     var render = new pPointsRenderer({ size: 30000, enabled: true });
-//     var sys = new pSys(30000,
-//         [
-//             target,
-//             damp,
-//             velocity,
-//             position,
-//             fade,
-//         ],
-//         [
-//             render,
-//         ]);
+            var vector = new THREE.Vector3(c.p[0], c.p[1], c.p[2]).applyMatrix4(
+                this.params.matrixWorld
+            ).project(Shared.camera);
+            vector.x = (vector.x + 1) / 2 * Shared.W;
+            vector.y = -(vector.y - 1) / 2 * Shared.H;
+            if (c.bag.floater && Math.random() > (0.98 * this.params.chance.value)) {
+                c.bag.floater.hide();
+                this.floaters.push(c.bag.floater);
+                c.bag.floater = undefined;
+            }
+            else if (vector.x > 0 && vector.x < Shared.W && vector.y > 0 && vector.y < Shared.H && Math.random() < this.params.chance.value) {
+                //good
+                if (!c.bag.floater && this.floaters.length && Math.random() > 0.99) {
+                    c.bag.floater = this.floaters.pop();
+                }
+                if (!c.bag.floater) {
+                    continue;
+                }
+                c.bag.floater.setPos(vector.x, vector.y, 1);
+                c.bag.floater.show();
+            } else if (c.bag.floater) {
+                c.bag.floater.hide();
+                this.floaters.push(c.bag.floater);
+                c.bag.floater = undefined;
+            }
+        }
+    }
+}
 
-//     render.material.sizeAttenuation = true;
-//     render.material.size = 4;
-//     render.material.map = THREE.ImageUtils.loadTexture("/assets/Dot.png");
-//     group.add(render.mesh);
-//     return () => {
-
-//         for (var i = 0; i < 100 && i < sys.seek(); i++) {
-//             sys.emit((pt) => {
-//                 pt.l = 1;
-//                 pt.vl = 0.006;
-//                 let deg = Math.random() * Math.PI * 2;
-//                 let r = Math.random();
-//                 //pt.p = [(Math.random() - 0.5) * 200, -50, Math.random() * 400];
-//                 // pt.p = [Math.sin(deg) * r * 300, -40 + (Math.random() * 20 - 5) * Math.cos(r * Math.PI), Math.cos(deg) * r * 300 + 200];
-//                 // pt.p = [Math.sin(deg) * r * 300, -45, Math.cos(deg) * r * 370];
-//                 pt.p = [(Math.random() - 0.5) * 330, (Math.random() - 0.5) * 330, (Math.random() - 0.5) * 3];
-//                 pt.c = [1, 1, 1];
-//                 pt.v = [(Math.random() - 0.5) * 55, (Math.random() - 0.5) * 55, (Math.random() - 0.5) * 55];
-//                 pt.alpha = 0;
-//             });
-//         }
-
-//         // target.params.power = Shared.timeline.at(0, 2, Shared.timeline.EasingFunctions.linear, 0, 0.01);
-//         // random.params.power = Shared.timeline.at(0, 7, Shared.timeline.EasingFunctions.linear, 0.8, 0);
-
-//         // gravity.params.enabled = Shared.timeline.at(0, 3, Shared.timeline.EasingFunctions.linear) > 0.9;
-//         // gravity.params.g = Shared.timeline.at(4, 1, Shared.timeline.EasingFunctions.linear, 3000, -20000);
-//         sys.update(Shared.timeline.at(3, 8, Shared.timeline.EasingFunctions.linear, 1, 0.03));
-//         sys.render();
-//     };
-// });
-
-// export var InterfereSystem = BuildRenderable((group) => {
-
-//     var target = new pTargetBehavior({ enabled: true, power: 10.1, powerColor: 0.1, clamp: .5 });
-//     target.generateDemoTarget("#");
-
-//     var gravity = new pGravityBehavior({ eanbled: true, g: 300000, clamp: 0.03 });
-//     var velocity = new pMoveBehavior({ enabled: true, stage: "velocity" });
-//     var damp = new pDampingBehavior({ enabled: true, power: 0.93 });
-//     var position = new pMoveBehavior({ enabled: true, stage: "position" });
-//     var blink = new pBlinkBehavior({ enabled: true });
-//     var fade = new pFadeBehavior({ enabled: true, phase: 'life', curve: 8 });
-//     var render = new pPointsRenderer({ size: 30000, enabled: true });
-//     var sys = new pSys(30000,
-//         [
-//             target,
-//             damp,
-//             velocity,
-//             position,
-//             fade,
-//         ],
-//         [
-//             render,
-//         ]);
-//     render.material.sizeAttenuation = true;
-//     render.material.size = 4;
-//     render.material.map = THREE.ImageUtils.loadTexture("/assets/Dot.png");
-//     group.add(render.mesh);
-//     return () => {
-
-//         for (var i = 0; i < 100 && i < sys.seek(); i++) {
-//             sys.emit((pt) => {
-//                 pt.l = 1;
-//                 pt.vl = 0.006;
-//                 let deg = Math.random() * Math.PI * 2;
-//                 let r = Math.random();
-//                 //pt.p = [(Math.random() - 0.5) * 200, -50, Math.random() * 400];
-//                 // pt.p = [Math.sin(deg) * r * 300, -40 + (Math.random() * 20 - 5) * Math.cos(r * Math.PI), Math.cos(deg) * r * 300 + 200];
-//                 // pt.p = [Math.sin(deg) * r * 300, -45, Math.cos(deg) * r * 370];
-//                 pt.p = [0, 0, -300];
-//                 pt.c = [1, 1, 1];
-//                 pt.v = [0, 0, 0];
-//                 pt.alpha = 0;
-//             });
-//         }
-
-//         // target.params.power = Shared.timeline.at(0, 2, Shared.timeline.EasingFunctions.linear, 0, 0.01);
-//         // random.params.power = Shared.timeline.at(0, 7, Shared.timeline.EasingFunctions.linear, 0.8, 0);
-
-//         // gravity.params.enabled = Shared.timeline.at(0, 3, Shared.timeline.EasingFunctions.linear) > 0.9;
-//         // gravity.params.g = Shared.timeline.at(4, 1, Shared.timeline.EasingFunctions.linear, 3000, -20000);
-//         sys.update(Shared.timeline.at(3, 8, Shared.timeline.EasingFunctions.linear, 1, 0.03));
-//         sys.render();
-//     };
-// });
-
-// export var FireSystem = BuildRenderable((group) => {
-
-//     var target = new pTargetBehavior({ enabled: true, power: 1.1, powerColor: 0.1, clamp: .1 });
-//     target.generateDemoTarget("#");
-
-//     var gravity = new pGravityBehavior({ eanbled: true, g: 300000, clamp: 0.03 });
-//     var velocity = new pMoveBehavior({ enabled: true, stage: "velocity" });
-//     var damp = new pDampingBehavior({ enabled: true, power: 0.93 });
-//     var position = new pMoveBehavior({ enabled: true, stage: "position" });
-//     var blink = new pBlinkBehavior({ enabled: true });
-//     var fade = new pFadeBehavior({ enabled: true, phase: 'life', curve: 8 });
-//     var render = new pPointsRenderer({ size: 30000, enabled: true });
-//     var sys = new pSys(30000,
-//         [
-//             target,
-//             damp,
-//             velocity,
-//             position,
-//             fade,
-//         ],
-//         [
-//             render,
-//         ]);
-//     render.material.sizeAttenuation = true;
-//     render.material.size = 4;
-//     render.material.map = THREE.ImageUtils.loadTexture("/assets/Dot.png");
-//     group.add(render.mesh);
-//     return () => {
-
-//         for (var i = 0; i < Math.abs(Math.sin(Shared.t)) * 100 && i < sys.seek(); i++) {
-//             sys.emit((pt) => {
-//                 pt.l = 1;
-//                 pt.vl = 0.006;
-//                 let deg = Math.random() * Math.PI * 2;
-//                 let r = Math.random();
-//                 //pt.p = [(Math.random() - 0.5) * 200, -50, Math.random() * 400];
-//                 // pt.p = [Math.sin(deg) * r * 300, -40 + (Math.random() * 20 - 5) * Math.cos(r * Math.PI), Math.cos(deg) * r * 300 + 200];
-//                 // pt.p = [Math.sin(deg) * r * 300, -45, Math.cos(deg) * r * 370];
-//                 pt.p = [100 * (Math.random() - 0.5), -30, -300];
-//                 pt.c = [1, 1, 1];
-//                 pt.v = [0, Math.random() * 3, 0];
-//                 pt.alpha = 0;
-//             });
-//         }
-
-//         // target.params.power = Shared.timeline.at(0, 2, Shared.timeline.EasingFunctions.linear, 0, 0.01);
-//         // random.params.power = Shared.timeline.at(0, 7, Shared.timeline.EasingFunctions.linear, 0.8, 0);
-
-//         // gravity.params.enabled = Shared.timeline.at(0, 3, Shared.timeline.EasingFunctions.linear) > 0.9;
-//         // gravity.params.g = Shared.timeline.at(4, 1, Shared.timeline.EasingFunctions.linear, 3000, -20000);
-//         sys.update(Shared.timeline.at(3, 8, Shared.timeline.EasingFunctions.linear, 1, 0.03));
-//         sys.render();
-//     };
-// });
-
-// export var GoodHashSystem = BuildRenderable((group) => {
-
-//     var target = new pTargetBehavior({ enabled: true, power: 0.01, powerColor: 0.1, clamp: 1.1 });
-//     target.generateDemoTarget("#");
-
-//     var gravity = new pGravityBehavior({ eanbled: true, g: 300000, clamp: 0.03 });
-//     var velocity = new pMoveBehavior({ enabled: true, stage: "velocity" });
-//     var damp = new pDampingBehavior({ enabled: true, power: 0.67 });
-//     var position = new pMoveBehavior({ enabled: true, stage: "position" });
-//     var blink = new pBlinkBehavior({ enabled: true });
-//     var fade = new pFadeBehavior({ enabled: true, phase: 'life', curve: 8 });
-//     var render = new pPointsRenderer({ size: 30000, enabled: true });
-//     var sys = new pSys(30000,
-//         [
-//             target,
-//             damp,
-//             velocity,
-//             position,
-//             fade,
-//         ],
-//         [
-//             render,
-//         ]);
-//     render.material.sizeAttenuation = true;
-//     render.material.size = 4;
-//     render.material.map = THREE.ImageUtils.loadTexture("/assets/Dot.png");
-//     group.add(render.mesh);
-//     return () => {
-
-//         for (var i = 0; i < Math.abs(Math.sin(Shared.t)) * 100 && i < sys.seek(); i++) {
-//             sys.emit((pt) => {
-//                 pt.l = 1;
-//                 pt.vl = 0.003;
-//                 let deg = Math.random() * Math.PI * 2;
-//                 let r = Math.random();
-//                 //pt.p = [(Math.random() - 0.5) * 200, -50, Math.random() * 400];
-//                 // pt.p = [Math.sin(deg) * r * 300, -40 + (Math.random() * 20 - 5) * Math.cos(r * Math.PI), Math.cos(deg) * r * 300 + 200];
-//                 // pt.p = [Math.sin(deg) * r * 300, -45, Math.cos(deg) * r * 370];
-//                 pt.p = [400 * (Math.random() - 0.5), 100 * (Math.random() - 0.5), -300];
-//                 pt.c = [1, 1, 1];
-//                 pt.v = [0, 0, 0];
-//                 pt.alpha = 0;
-//             });
-//         }
-
-//         // target.params.power = Shared.timeline.at(0, 2, Shared.timeline.EasingFunctions.linear, 0, 0.01);
-//         // random.params.power = Shared.timeline.at(0, 7, Shared.timeline.EasingFunctions.linear, 0.8, 0);
-
-//         // gravity.params.enabled = Shared.timeline.at(0, 3, Shared.timeline.EasingFunctions.linear) > 0.9;
-//         // gravity.params.g = Shared.timeline.at(4, 1, Shared.timeline.EasingFunctions.linear, 3000, -20000);
-//         sys.update(Shared.timeline.at(3, 8, Shared.timeline.EasingFunctions.linear, 1, 0.03));
-//         sys.render();
-//     };
-// });
-
-// //entry/
-// export var GravityBeltSystem = BuildRenderable((group) => {
-
-//     var gravity = new pGravityBehavior({ eanbled: true, g: 3000, clamp: 0.01 });
-//     var velocity = new pMoveBehavior({ enabled: true, stage: "velocity" });
-//     var damp = new pDampingBehavior({ enabled: true, power: 0.97 });
-//     var position = new pMoveBehavior({ enabled: true, stage: "position" });
-//     var blink = new pBlinkBehavior({ enabled: true });
-//     var fade = new pFadeBehavior({ enabled: true, phase: 'life', curve: 8 });
-//     var render = new pPointsRenderer({ size: 30000, enabled: true });
-//     var sys = new pSys(30000,
-//         [
-//             gravity,
-//             damp,
-//             velocity,
-//             position,
-//             fade,
-//             blink
-//         ],
-//         [
-//             render,
-//         ]);
-//     render.material.sizeAttenuation = true;
-//     render.material.size = 4;
-//     render.material.map = THREE.ImageUtils.loadTexture("/assets/Dot.png");
-//     group.add(render.mesh);
-//     return () => {
-
-//         for (var i = 0; i < Math.abs(Math.sin(Shared.t)) * 100 && i < sys.seek(); i++) {
-//             sys.emit((pt) => {
-//                 pt.l = 1;
-//                 pt.vl = 0.003;
-//                 let deg = Math.random() * Math.PI * 2;
-//                 let r = Math.random();
-//                 //pt.p = [(Math.random() - 0.5) * 200, -50, Math.random() * 400];
-//                 // pt.p = [Math.sin(deg) * r * 300, -40 + (Math.random() * 20 - 5) * Math.cos(r * Math.PI), Math.cos(deg) * r * 300 + 200];
-//                 // pt.p = [Math.sin(deg) * r * 300, -45, Math.cos(deg) * r * 370];
-//                 pt.p = [1400 * (Math.random() - 0.5), 100 * (Math.random() - 0.5), -300];
-//                 pt.c = [1, 1, 1];
-//                 pt.v = [0, 0, 0];
-//                 pt.alpha = 0;
-//             });
-//         }
-
-//         // target.params.power = Shared.timeline.at(0, 2, Shared.timeline.EasingFunctions.linear, 0, 0.01);
-//         // random.params.power = Shared.timeline.at(0, 7, Shared.timeline.EasingFunctions.linear, 0.8, 0);
-
-//         // gravity.params.enabled = Shared.timeline.at(0, 3, Shared.timeline.EasingFunctions.linear) > 0.9;
-//         // gravity.params.g = Shared.timeline.at(4, 1, Shared.timeline.EasingFunctions.linear, 3000, -20000);
-//         sys.update(Shared.timeline.at(3, 8, Shared.timeline.EasingFunctions.linear, 1, 0.03));
-//         sys.render();
-//     };
-// });
-
-// export var WaveSystem = BuildRenderable((group) => {
-//     var gravity = new pGravityBehavior({ eanbled: true, g: -30, clamp: 0.01 });
-//     var velocity = new pMoveBehavior({ enabled: true, stage: "velocity" });
-//     var damp = new pDampingBehavior({ enabled: true, power: 0.97 });
-//     var position = new pMoveBehavior({ enabled: true, stage: "position" });
-//     var blink = new pBlinkBehavior({ enabled: true });
-//     var fade = new pFadeBehavior({ enabled: true, phase: 'life', curve: 8 });
-//     var render = new pPointsRenderer({ size: 30000, enabled: true });
-//     var sys = new pSys(30000,
-//         [
-//             gravity,
-//             damp,
-//             velocity,
-//             position,
-//             fade,
-//             blink
-//         ],
-//         [
-//             render,
-//         ]);
-//     render.material.sizeAttenuation = true;
-//     render.material.size = 4;
-//     render.material.map = THREE.ImageUtils.loadTexture("/assets/Dot.png");
-//     group.add(render.mesh);
-//     return () => {
-
-//         for (var i = 0; i < Math.abs(Math.sin(Shared.t)) * 100 && i < sys.seek(); i++) {
-//             sys.emit((pt) => {
-//                 pt.l = 1;
-//                 pt.vl = 0.003;
-//                 let deg = Math.random() * Math.PI * 2;
-//                 let r = Math.random();
-//                 // pt.p = [(Math.random() - 0.5) * 200, -50, Math.random() * 400];
-//                 pt.p = [Math.sin(deg) * r * 3, Math.cos(deg) * r * 3, - 300 + (Math.random() - 0.5) * 10];
-//                 // pt.p = [Math.sin(deg) * r * 300, -45, Math.cos(deg) * r * 370];
-//                 // pt.p = [10 * (Math.random() - 0.5), 10 * (Math.random() - 0.5), -300];
-//                 pt.c = [1, 1, 1];
-//                 pt.v = [0, 0, 0];
-//                 pt.alpha = 0;
-//             });
-//         }
-
-//         T.update();
-
-//         // target.params.power = Shared.timeline.at(0, 2, Shared.timeline.EasingFunctions.linear, 0, 0.01);
-//         // random.params.power = Shared.timeline.at(0, 7, Shared.timeline.EasingFunctions.linear, 0.8, 0);
-
-//         // gravity.params.enabled = Shared.timeline.at(0, 3, Shared.timeline.EasingFunctions.linear) > 0.9;
-//         // gravity.params.g = Shared.timeline.at(4, 1, Shared.timeline.EasingFunctions.linear, 3000, -20000);
-//         sys.update(T.v);
-//         sys.render();
-//     };
-// });
-
-// export var StarSystem = BuildRenderable((group) => {
-//     var gravity = new pGravityBehavior({ eanbled: true, g: 50000, clamp: 1, point: [0, 0, 100] });
-//     var velocity = new pMoveBehavior({ enabled: true, stage: "velocity" });
-//     var damp = new pDampingBehavior({ enabled: true, power: 0.99 });
-//     var position = new pMoveBehavior({ enabled: true, stage: "position" });
-//     var blink = new pBlinkBehavior({ enabled: true });
-//     var fade = new pFadeBehavior({ enabled: true, phase: 'life', curve: 8 });
-//     var render = new pPointsRenderer({ size: 30000, enabled: true });
-//     var sys = new pSys(30000,
-//         [
-//             gravity,
-//             damp,
-//             velocity,
-//             position,
-//             fade,
-//             blink
-//         ],
-//         [
-//             render,
-//         ]);
-
-//     render.material.sizeAttenuation = true;
-//     render.material.size = 4;
-//     render.material.map = THREE.ImageUtils.loadTexture("/assets/Dot.png");
-//     group.add(render.mesh);
-//     group.translateZ(-500);
-//     return () => {
-//         render.mesh.rotateY(0.0003);
-//         render.mesh.rotateX(0.0006);
-//         for (var i = 0; i < Math.abs(Math.sin(Shared.t)) * 500 && i < sys.seek(); i++) {
-//             sys.emit((pt) => {
-//                 pt.l = 1;
-//                 pt.vl = 0.006;
-//                 let deg = Math.random() * Math.PI * 2;
-//                 let r = Math.random();
-//                 pt.p = [(Math.random() - 0.5) * 200, -50, Math.random() * 400];
-//                 pt.p = [Math.sin(deg) * r * 3, Math.cos(deg) * r * 3, - 300 + (Math.random() - 0.5) * 10];
-//                 // pt.p = [Math.sin(deg) * r * 300, -45, Math.cos(deg) * r * 370];
-//                 pt.p = [0, 0, -100];
-//                 pt.c = [1, 1, 1];
-//                 pt.v = [(Math.random() - 0.5) * 35, (Math.random() - 0.5) * 35, 0];
-//                 pt.alpha = 0;
-//             });
-//         }
-//         T.update();
-//         // target.params.power = Shared.timeline.at(0, 2, Shared.timeline.EasingFunctions.linear, 0, 0.01);
-//         // random.params.power = Shared.timeline.at(0, 7, Shared.timeline.EasingFunctions.linear, 0.8, 0);
-//         // gravity.params.enabled = Shared.timeline.at(0, 3, Shared.timeline.EasingFunctions.linear) > 0.9;
-//         // gravity.params.g = Shared.timeline.at(4, 1, Shared.timeline.EasingFunctions.linear, 3000, -20000);
-//         sys.update(T.v);
-//         sys.render();
-//     };
-// });
 
 
 export class ParticleBackground extends THREERenderable {
@@ -475,7 +138,7 @@ export class ParticleBackground extends THREERenderable {
             }
         };
 
-        this.size = 30000;        
+        this.size = 25000;
 
         this.random = new pRandomBehavior({ enabled: true, power: 0.6 });
         this.target = new pTargetBehavior({ enabled: false, power: 10.1, powerColor: 0.1, clamp: .5 });
@@ -487,11 +150,14 @@ export class ParticleBackground extends THREERenderable {
         this.blink = new pBlinkBehavior({ enabled: true });
         this.fade = new pFadeBehavior({ enabled: true, phase: 'life', curve: 4 });
         this.renderer = new pPointsRenderer({ size: this.size, enabled: true });
+        this.domRenderer = new pDomRenderer({ size: 10, enabled: true });
+
+        this.WeiboList = this.domRenderer.manager;
 
         // this.renderer.mesh.translateZ(-500);
 
         this.renderer.material.sizeAttenuation = true;
-        this.renderer.material.size = 4;
+        this.renderer.material.size = 3;
         this.renderer.material.map = THREE.ImageUtils.loadTexture("/assets/Dot.png");
         this.group.add(this.renderer.mesh);
 
@@ -507,13 +173,15 @@ export class ParticleBackground extends THREERenderable {
                 this.blink
             ],
             [
-                this.renderer
+                this.renderer,
+                this.domRenderer
             ]);
 
         this.configurations = [
             //special configuration / exit.
             () => {
 
+                this.domRenderer.params.chance.target = 0;
                 this.params.posZ.target = -500;
                 this.params.posZ.ease = 0.1;
 
@@ -536,6 +204,7 @@ export class ParticleBackground extends THREERenderable {
 
             //hash1
             () => {
+                this.domRenderer.params.chance.target = 0;
 
                 // this.params.simulationSpeedEase.target = 0.1;
                 // this.params.simulationSpeed.target = 0;
@@ -597,7 +266,6 @@ export class ParticleBackground extends THREERenderable {
 
             //normal
             () => {
-
                 this.params.posZ.target = -300;
                 this.params.posZ.ease = 0.005;
                 this.params.simulationSpeedEase.target = 0.2;
@@ -738,15 +406,16 @@ export class ParticleBackground extends THREERenderable {
     }
 
     shuffleEffects() {
+
         this.t = 0;
         var offset = 2;
         var length = this.configurations.length - offset
         return this.setConfig(
             4
-        //  2 //   o
+            //  2 //   o
         )
         var o = Math.floor(Math.random() * length) + offset;
-        while(o == this.last) {
+        while (o == this.last) {
             o = Math.floor(Math.random() * length) + offset;;
         }
         this.last = o;
@@ -762,9 +431,15 @@ export class ParticleBackground extends THREERenderable {
         this.setConfig(
             Math.floor(Math.random() * length) + offset
         )
+
     }
 
     render() {
+
+
+        if (Shared.implode) {
+            this.domRenderer.params.chance.target = 1;
+        }
 
         Shared.implode = false;
 
@@ -776,6 +451,8 @@ export class ParticleBackground extends THREERenderable {
         this.renderer.mesh.position.z = this.params.posZ.value;
         this.renderer.mesh.rotateX(this.params.rotateX.value * this.params.rotationSpeed.value);
         this.renderer.mesh.rotateY(this.params.rotateY.value * this.params.rotationSpeed.value);
+        this.domRenderer.params.matrixWorld = this.renderer.mesh.matrixWorld;
+
         this.params.simulationSpeed.ease = this.params.simulationSpeedEase.value;
         this.pSys.update(this.params.simulationSpeed.value);
         this.pSys.render();
@@ -796,10 +473,12 @@ export class ParticleBackground extends THREERenderable {
     }
 
     in(t) {
+
         if (this.cacheState == true) return;
         this.YFactor = Math.random() * 100;
         this.YOffset = (Math.random() * 1 - 0.5);
         this.isVisible = true;
+        this.domRenderer.params.chance.target = 0;
         this.cacheState = true;
 
         this.shuffleEntry();
@@ -824,13 +503,14 @@ export class ParticleBackground extends THREERenderable {
     out() {
         if (this.cacheState == false) return;
         this.cacheState = false;
+        this.domRenderer.params.chance.target = 0;
         this.transition = true;
         this.params.simulationSpeed.target = 0.7;
         this.params.simulationSpeedEase.target = 0.01;
         this.params.emissionRate.target = 0;
 
 
-        for(var i = 0; i < this.pSys.ps.length; i++){
+        for (var i = 0; i < this.pSys.ps.length; i++) {
             this.pSys.ps[i].vl = 0.005;
         }
 

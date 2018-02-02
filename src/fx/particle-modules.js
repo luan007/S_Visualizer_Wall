@@ -265,6 +265,7 @@ export class pTargetBehavior extends pBehavior {
             }
         }
         console.log(txt + " consumed (particle) " + q);
+        return q;
     }
 
     onInit(pt, i) {

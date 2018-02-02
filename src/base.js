@@ -229,13 +229,12 @@ export class SceneControl extends Renderable {
         this.nextStage = undefined;
         this.data = [
             {
-                text: "#北京721双闪车队#",
+                text: "#十九大#",
                 numbers: [
                     ["VIEWS / 话题阅读量", 56.8, "亿"],
                     ["PARTICIPANTS / 话题讨论量", 868.6, "万"],
                 ]
             },
-
             {
                 text: "#北京721双闪车队#",
                 numbers: [
@@ -279,7 +278,6 @@ export class SceneControl extends Renderable {
             for (var i = 0; i < this.managed.length; i++) {
                 if (this.managed[i].isVisible !== this.nextStage || this.managed[i].transition) {
                     this.stageMatch = false;
-                    console.log(this.managed[i])
                     break;
                 }
             }

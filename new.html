@@ -7,12 +7,15 @@
         * {
             user-select: none;
         }
+
         html {
             background: #333;
         }
+
         #bgCanvas {
             background: #111;
         }
+
         #maincanvas {
             position: fixed;
             top: 0;
@@ -21,12 +24,68 @@
             width: 100%;
             /* height: 960px; */
         }
-        .suite-canvas{
+
+        .suite-canvas {
             position: fixed;
             top: 0;
             left: 0;
 
         }
+
+        .animate-block {
+            overflow: hidden;
+        }
+
+
+        @keyframes superblink {
+            0% {
+                background: #fff;
+            }
+            50% {
+                background: #000;
+            }
+            100% {
+                background: #fff;
+            }
+        }
+
+        .animate-block:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            animation: superblink 0.3s 0.5s infinite;
+            transform: translate3d(-100%, 0, 0) translate3d(-1px, 0, 0);
+            transition: transform 0.8s;
+            transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1);
+        }
+
+        .animate-block:hover:after {
+            transform: translate3d(110%, 0, 0) translate3d(-1px, 0, 0);
+        }
+
+        .animate-block .wrapper {
+            transition: visibility 0.2s 0.2s;
+            visibility: collapse;
+        }
+
+        .animate-block:hover .wrapper {
+            transition: visibility 0.4s 0.4s;
+            visibility: visible;
+        }
+
+        .edge-tri {
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 5vw 5vw 0 0;
+            border-color: #ffffff transparent transparent transparent;
+        }
+
+
     </style>
     <script src="/libs/odometer.min.js"></script>
     <link rel="stylesheet" href="/libs/odometer-theme-minimal.css">
@@ -57,7 +116,38 @@
             </div>
         </div> -->
     </div>
-    <!-- <div class='title'>北京721双闪车队</div> -->
+
+    <div class='animate-block' style="
+    position: fixed;
+    top: 100px;
+    left: 100px;
+    width: 18vw;
+    line-height: 2;
+    font-size: 0.8vw;
+    font-family: PingFang SC;
+    color: #f1f1f1;
+    padding: 1vw 1.5vw;
+    font-weight: bold;
+    letter-spacing: 0.05vw;
+    text-shadow: 2px 2px 0px #000000;
+    mix-blend-mode: color-dodge;
+    ">
+        <div class='wrapper'>
+            <div style="
+        position: absolute;
+        top: 5.2vw;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #848484;
+        border-bottom: 3px solid #ecd60c;
+        mix-blend-mode: saturation;
+    "></div>
+            <span style="position: relative;">十九大10月18日在北京召开，事关党和国家事业继往开来，事关中国特色社会主义前途命运，事关最广大人民根本利益。全民关注，继往开来。</span>
+        </div>
+    </div>
+
+
     <script src='build/main.js'></script>
     <script>
         // setTimeout(() => {

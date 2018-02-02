@@ -19,6 +19,10 @@ var numbers = new GUI.Numbers();
 DOMContainer.add(numbers);
 
 var bgCanvas = new GUI.AvatarWall();
+DOMContainer.add(bgCanvas);
+
+DOMContainer.add(ParticleBG.WeiboList);
+
 
 //Logic
 var Scene = new SceneControl();
@@ -29,7 +33,7 @@ Scene.managed.push(bgCanvas);
 
 window.scene = Scene;
 
-var root = new Renderable([Scene, ThreeRenderTarget, DOMContainer, bgCanvas]);
+var root = new Renderable([Scene, ThreeRenderTarget, DOMContainer]);
 export function update() {
     root.update();
 }
