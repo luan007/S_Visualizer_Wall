@@ -180,7 +180,7 @@
     position: fixed;
     top: 0;
     left: 0;
-    opacity: 1;
+    visibility: collapse;
 
     div:nth-child(2) {
         .scaler:before {
@@ -204,9 +204,8 @@
     }
 }
 
-
 .weibo-floaters.show {
-    opacity: 1;
+    visibility: visible;
 }
 
 @keyframes blink {
@@ -281,22 +280,36 @@
 
 
 .explainer {
+
+    .edge-tri {
+        opacity: 0;
+    }
+    transition: 1.5s transform ease;
     position: fixed;
     max-width: 18vw;
+    top: 0;
+    left: 0;
     line-height: 2;
     font-size: 0.65vw;
-    font-family: PingFang SC;
+    font-family: 'PingFang SC';
     padding: 0.5vw 1.2vw;
     font-weight: bold;
     letter-spacing: 0.05vw;
-
     .subtitle {
         color: white;padding: 0;font-size: 0.9em;opacity: 0.5;padding-bottom: 0.2vw;font-weight: bolder;
     }
-
     .typer {
         position: relative;background: white;color: black; -webkit-box-decoration-break: clone;padding: 0.3vw;font-weight: lighter;line-height: 2.1vw;box-shadow: 0px 0px 0px #616161;
     }
+
+    &.show {
+        transform: translateY(-1vw);
+
+        .edge-tri {
+            opacity: 1;
+        }
+    }
+    
 }
 
 
@@ -319,7 +332,7 @@
     }
 }
 
-@keyframes hovering-v {
+@keyframes hover-v {
     0% {
         transform: translate(0, 0);
     }
@@ -331,8 +344,8 @@
     }
 }
 
-.hovering-v {
-    animation: hovering-v 5s ease infinite;
+.hover-v {
+    animation: hover-v 5s ease infinite;
 }
 
 .animate-block:after {
@@ -374,4 +387,61 @@
     border-style: solid;
     border-width: 0.5vw 0.5vw 0 0;
     border-color: #ffffff transparent transparent transparent;
+}
+
+
+@keyframes flashylarge{
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(45deg) scale(1);
+    }
+    50% {
+        transform: translate(-50%, -50%) rotate(45deg) scale(2);
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(45deg) scale(1);
+    }
+}
+
+.chooser {
+
+    position: fixed;
+    top: 10vw;
+    left: 40vw;
+
+    .flashy-large {
+        animation: flashylarge 1.5s infinite;
+        position: absolute;
+        background: transparent;
+        border: 0.1vw solid  white;   
+        height: 0.7vw;
+        width: 0.7vw;
+        transform: translate(-50%, -50%) rotate(45deg) scale(2.2);
+    }
+
+    .flashy-tiny {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.13);
+        height: 0.5vw;
+        width: 0.5vw;
+        border: 0.1vw solid  white;           
+        transform: translate(-50%, -50%) rotate(45deg) scale(1.0);
+    }
+
+    .chooser-title {
+        font-size: 0.6vw;
+        color: #ffffff;
+        position: absolute;
+        background: #8a8a8a21;
+        font-family: PingFang SC;
+        font-weight: bolder;
+        padding: 0.1vw 0.9vw;
+        vertical-align: middle;
+        border: 0.01vw solid #bababa;
+        white-space: nowrap;
+        transform: translate(1vw,-50%);
+        opacity: 1;
+    }
 }

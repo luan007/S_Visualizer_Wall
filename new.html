@@ -29,7 +29,6 @@
             position: fixed;
             top: 0;
             left: 0;
-
         }
     </style>
     <script src="/libs/odometer.min.js"></script>
@@ -41,15 +40,23 @@
 
 <body>
     <canvas class='suite-canvas' id='maincanvas'></canvas>
+    <div class="chooser">
+        <div class="flashy-large"></div>
+        <div class="flashy-tiny"></div>
+        <div class='chooser-title'>[ 话题主持人 ]</div>
+        <div class="wrapper animate-block" style="
+                width: 300px;
+                height: 200px;
+                position: relative;
+                z-index: -1;
+                background: red;
+            ">
+
+
+
+        </div>
+    </div>
     <script src='build/main.js'></script>
-    <script>
-        // window.typer = new TypeIt($('.typer'), {
-        //     // strings: ["十九大10月18日在北京召开，事关党和国家事业继往开来，事关中国特色社会主义前途命运，事关最广大人民根本利益。全民关注，继往开来。"],
-        //     speed: 20,
-        //     lifeLike: true,
-        //     autoStart: true
-        // });
-    </script>
 </body>
 
 </html>

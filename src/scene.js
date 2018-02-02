@@ -14,6 +14,8 @@ var DOMContainer = new GUI.FixedContainer();
 DOMContainer.domElement.appendTo($(document.body));
 var title = new GUI.Title();
 DOMContainer.add(title);
+var subtitle = new GUI.Explainer();
+DOMContainer.add(subtitle);
 
 var numbers = new GUI.Numbers();
 DOMContainer.add(numbers);
@@ -27,6 +29,7 @@ DOMContainer.add(ParticleBG.WeiboList);
 //Logic
 var Scene = new SceneControl();
 Scene.managed.push(title);
+Scene.managed.push(subtitle);
 Scene.managed.push(numbers);
 Scene.managed.push(ParticleBG);
 Scene.managed.push(bgCanvas);

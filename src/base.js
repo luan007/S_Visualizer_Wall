@@ -230,6 +230,7 @@ export class SceneControl extends Renderable {
         this.data = [
             {
                 text: "#十九大#",
+                explaination: "十九大10月18日在北京召开，事关党和国家事业继往开来，事关中国特色社会主义前途命运，事关最广大人民根本利益。全民关注，继往开来。",
                 numbers: [
                     ["VIEWS / 话题阅读量", 56.8, "亿"],
                     ["PARTICIPANTS / 话题讨论量", 868.6, "万"],
@@ -237,6 +238,7 @@ export class SceneControl extends Renderable {
             },
             {
                 text: "#北京721双闪车队#",
+                explaination: "十九大10月18日在北京召开，事关党和国家事业继往开来，事关中国特色社会主义前途命运，事关最广大人民根本利益。全民关注，继往开来。",
                 numbers: [
                     ["VIEWS / 话题阅读量", 56.8, "亿"],
                     ["PARTICIPANTS / 话题讨论量", 868.6, "万"],
@@ -278,6 +280,7 @@ export class SceneControl extends Renderable {
             for (var i = 0; i < this.managed.length; i++) {
                 if (this.managed[i].isVisible !== this.nextStage || this.managed[i].transition) {
                     this.stageMatch = false;
+                    // console.log(this.managed[i]);
                     break;
                 }
             }

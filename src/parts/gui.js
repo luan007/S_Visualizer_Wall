@@ -190,7 +190,7 @@ export class AnyBlock extends DOMRenderable {
         this.domElement.on("transitionend", (e) => {
             clearTimeout(later);
             later = setTimeout(() => {
-                console.log("LATER", this.isVisible);
+                console.log("LATER", this);
                 if (!this.domElement.hasClass("show")) {
                     // visible, all good
                     this.isVisible = false;
@@ -240,7 +240,6 @@ export class AnyBlock extends DOMRenderable {
     }
 
     render() {
-
         if (Shared.implode && this._implode_pending) {
             this._implode_pending = false;
             this._generateDom();
@@ -427,7 +426,7 @@ export class AvatarWall extends DOMRenderable {
             for (var y = 0; y < 960; y += step) {
                 let jibu = 255;
                 let jibu2 = Math.abs(noise.perlin3(x / 30, -y / 1559 - Shared.t * 0.3, Shared.t * 1.2)) * 0.3 * (1 + this.pulse.value);
-               
+
                 for (var i = 0; i < Shared.posX.length; i++) {
                     var dist = 1 - Math.min(1, Math.abs(x - Shared.posX[i].get()) / 200, 2);
                     if (dist > 0) {
@@ -435,7 +434,7 @@ export class AvatarWall extends DOMRenderable {
                         continue;
                     }
                 }
-                if (jibu2 < 0.1) continue; 
+                if (jibu2 < 0.1) continue;
                 let nts = Math.floor(Math.abs(noise.perlin3(x / 90, y / 99, Shared.t / 50)) * this.imgList.length);
                 ctx.save();
                 ctx.translate(x, y);
@@ -461,43 +460,61 @@ export class AvatarWall extends DOMRenderable {
     }
 }
 
-export class Explainer extends DOMRenderable {
+export class Explainer extends AnyBlock {
     constructor(_render) {
         super(_render);
         this.isVisible = false;
         this.domElement = $(`
             <div class="explainer animate-block">
-                <div class="wrapper">
-                    <div class="edge-tri"></div>
+                <div class="edge-tri"></div>
+                <div class="wrapper hover-v">
                     <div class='subtitle'>事件简介 / INTRODUCTION</div>
                     <span class='typer'></span>
                 </div>
             </div>
         `);
         this.dom_subtitle = $(this.domElement.find(".scaler")[0]);
-        this.dom_at = $(this.domElement.find(".at")[0]);
-        this.dom_content = $(this.domElement.find(".content")[0]);
-        this.dom_avatar = $(this.domElement.find(".avatar-image")[0]);
+        this.dom_typer = $(this.domElement.find(".typer")[0]);
     }
-    show(x, y, url) {
-        this.dom_avatar.attr("src", url);
-        this.domElement.css("transform", `translate(${px(x)}, ${px(y)})`);
-        if (this.prev[0] !== x || this.prev[1] !== y) {
+
+
+    out() {
+        if (this.cacheState == false) return;
+        if (this.domElement.hasClass("show")) {
+            this.cacheState = false;
+            this._implode_pending = false;
+            this.transition = false;
             this.domElement.removeClass("show");
-            this.prev[0] = x;
-            this.prev[1] = y;
+        } else {
             this.isVisible = false;
-            return;
+            this.transition = false;
         }
-        if (!this.isVisible) {
-            this.isVisible = true;
+    }
+
+    _generateDom() {
+        if (this.typer) {
+            this.typer.destroy();
+            this.dom_typer.html("");
+            this.typer = undefined;
+        }
+
+        if (this.data && this.data.explaination) {
+            this.domElement.css({
+                top: 10 + "vh",
+                left: 10 + "vh"
+            });
+
+            this.typer = new TypeIt(this.dom_typer, {
+                speed: 10,
+                lifeLike: true,
+                autoStart: true
+            });
+            this.typer.type(this.data.explaination);
             this.domElement.addClass("show");
-        }
-    }
-    hide() {
-        if (this.isVisible) {
-            this.isVisible = false;
+        } else {
             this.domElement.removeClass("show");
         }
+        this.transition = false;
     }
+
 }
