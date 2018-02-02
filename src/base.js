@@ -40,7 +40,6 @@ export class Renderable {
         if (!this._enabled) return;
         if (this._childrenDirty) {
             this.children = this.children.filter(child => {
-                if (child._markRemoval) this.group.remove(child.group);
                 return !child._markRemoval;
             });
             this._childrenDirty = false;
@@ -100,7 +99,7 @@ export class DOMRenderable extends Renderable {
         super.add(obj);
     }
     destroy() {
-        (this.domElement && parent.domElement) && this.parent.domElement.remove(this.domElement);
+        this.domElement.remove();
         super.destroy();
     }
     setEnabled(e) {
@@ -234,6 +233,27 @@ export class SceneControl extends Renderable {
                 numbers: [
                     ["VIEWS / 话题阅读量", 56.8, "亿"],
                     ["PARTICIPANTS / 话题讨论量", 868.6, "万"],
+                ],
+                attrs: [
+                    ["weibo-user", {
+                        img: "https://tva1.sinaimg.cn/crop.0.3.1018.1018.180/a716fd45gw1ev7q2k8japj20sg0sg779.jpg",
+                        v: "blue",
+                        username: "@人民日报",
+                        title: "话题主持人",
+                        intro: "参与、沟通、记录时代。",
+                        fans: 55785572,
+                        pos: [5.4815, 17.61273]
+                    }],
+
+                    ["weibo-user", {
+                        img: "https://tva1.sinaimg.cn/crop.0.3.1018.1018.180/a716fd45gw1ev7q2k8japj20sg0sg779.jpg",
+                        v: "red",
+                        username: "@环球时报",
+                        title: "互动大V",
+                        intro: "Test",
+                        fans: 55785572,
+                        pos: [40.4815, 5.61273]
+                    }]
                 ]
             },
             {

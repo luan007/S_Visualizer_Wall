@@ -362,8 +362,7 @@
     transition-timing-function: cubic-bezier(0.7, 0, 0.3, 1);
 }
 
-.animate-block.show:after,
-.animate-block:hover:after {
+.animate-block.show:after {
     transform: translate3d(110%, 0, 0) translate3d(-1px, 0, 0);
 }
 
@@ -372,8 +371,7 @@
     visibility: collapse;
 }
 
-.animate-block.show .wrapper,
-.animate-block:hover .wrapper {
+.animate-block.show .wrapper {
     transition: visibility 0.4s 0.4s;
     visibility: visible;
 }
@@ -406,12 +404,12 @@
 }
 
 .chooser {
-
+    pointer-events: none;
     opacity: 0;
     transition: opacity 0.5s ease;
     position: fixed;
-    top: 10vw;
-    left: 40vw;
+    top: 0vw;
+    left: 0vw;
 
     .flashy-large {
         animation: flashylarge 1.5s infinite;
@@ -445,10 +443,12 @@
         white-space: nowrap;
         transform: translate(1vw,-50%);
         opacity: 1;
+        z-index:9999;
     }
     .weibo-user {
         position: relative;
         top: 1.5vw;
+        left: -0.5vw;
         .wrapper {
             text-align: center;
             height: auto;
@@ -480,13 +480,17 @@
                 color: white;
                 padding: 0.13vw 0.23vw 0.05vw 0.23vw;
 
-                &:blue {
+
+                &.none {
+                    visibility: collapse;
+                }
+                &.blue {
                     background: #0091ff;
                 }
-                &:yellow {
+                &.yellow {
                     background: #ff9900;
                 }
-                &:red {
+                &.red {
                     background: rgb(223, 34, 13);
                 }
             }
@@ -502,6 +506,14 @@
             display: block;
         }
 
+        .username {
+                font-size: 0.5vw;
+                font-family: 'Source Han Sans CN';
+                display: block;
+                color: white;
+                padding-bottom: 0.2vw;
+        }
+
         .fans {
             color: #ffffff;
             font-family: Din, PingFang SC;
@@ -512,19 +524,30 @@
             padding-bottom: 0.1vw;
             background: #2f2f2f;
             margin-top: 0.4vw;
+            padding: 0.3vw 0.5vw;
 
             >div:first-of-type {
-                font-size: 1vw;
+                font-size: 0.5vw;
                 white-space: nowrap;
             }
 
-            >div:last-of-type {
-                
-            }
         }
     }
 }
 
 .chooser.show {
     opacity: 1;
+    pointer-events: all;
+}
+
+.data-floaters {
+    position:fixed;
+    top:0;
+    left:0;
+    z-index: 99999;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    &.show {
+        opacity: 1;
+    }
 }

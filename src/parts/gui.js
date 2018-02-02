@@ -500,7 +500,6 @@ export class Explainer extends AnyBlock {
                 top: 4 + "vw",
                 left: 3 + "vw"
             });
-
             this.typer = new TypeIt(this.dom_typer, {
                 speed: 10,
                 lifeLike: true,
@@ -516,6 +515,141 @@ export class Explainer extends AnyBlock {
 
 }
 
-export class DataFloater extends DOMRenderable {
+const numberWithCommas = (x) => {
+    var parts = x.toString().split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+}
 
+//https://tva1.sinaimg.cn/crop.0.3.1018.1018.180/a716fd45gw1ev7q2k8japj20sg0sg779.jpg
+function DataFloaterTemplate(type, d) {
+    switch (type) {
+        case "weibo-user":
+            return $(`
+            <div class="wrapper">
+                <div class="avatar">
+                    <img src="${d.img}" />
+                    <div class="V ${d.v}">微博认证</div>
+                </div>
+                <span class='username'>${d.username}</span>
+                <span class='intro'>${d.intro}</span>
+                <div class="fans">
+                    <div>粉丝 | ${numberWithCommas(d.fans)}</div>
+                </div>
+            </div>
+            `)
+    }
+    return undefined;
+};
+
+export class DataFloater extends DOMRenderable {
+    show() {
+        this.domElement.addClass("show");
+        this.dom_block.removeClass("show");
+    }
+    hide() {
+        this.domElement.removeClass("show");
+        this.dom_block.removeClass("show");
+    }
+    bindData(type, data) {
+        this.dom_block.html("");
+        this.dom_block.attr("class", "animate-block");
+        var bind = DataFloaterTemplate(type, data);
+        if (bind == undefined) {
+            return this.hide();
+        }
+        this.domElement.css("transform", `translate(${Math.random() * 50 + 20}vw, ${Math.random() * 15}vw) `);
+        if (data.pos) {
+            this.domElement.css("transform", `translate(${data.pos[0]}vw, ${data.pos[1]}vw) `);
+        }
+        bind.appendTo(this.dom_block);
+        this.dom_block.addClass(type);
+        this.dom_title.text("[ " + data.title + " ]");
+    }
+    constructor(_render) {
+        super(_render);
+        this.domElement = $(`
+        <div class="chooser">
+            <div class="flashy-large"></div>
+            <div class="flashy-tiny"></div>
+            <div class="chooser-title">[ 话题主持人 ]</div>
+            <div class="animate-block">
+            </div>
+        </div>
+        `);
+
+        this.domElement.on("click", () => {
+            this.dom_block.toggleClass("show");
+        });
+        this.dom_block = $(this.domElement.find(".animate-block")[0]);
+        this.dom_title = $(this.domElement.find(".chooser-title")[0]);
+
+        // this.dom_scaler.css("transform", `scale(${ r }, ${ r }) `);
+    }
+
+    setPos(x, y, r) {
+        this.domElement.css("transform", `translate(${px(x)}, ${px(y)}) `);
+    }
+}
+
+export class DataFloaterManager extends DOMRenderable {
+    constructor(size) {
+        super();
+        this.domElement = $(`
+        <div class="data-floaters show" ></div >
+            `);
+        this.floaters = [];
+        // for (var i = 0; i < size; i++) {
+        //     var floater = new DataFloater();
+        //     floater.addTo(this);
+        //     floater.bindData("weibo-user", {
+        //         img: "https://tva1.sinaimg.cn/crop.0.3.1018.1018.180/a716fd45gw1ev7q2k8japj20sg0sg779.jpg",
+        //         v: "blue",
+        //         username: "@人民日报",
+        //         title: "test",
+        //         intro: "参与、沟通、记录时代。",
+        //         fans: 55785572
+        //     });
+        //     floater.show();
+        //     this.floaters.push(floater);
+        // }
+    }
+
+    render() {
+        if (this._implode_pending && Shared.implode) {
+            var d = this.data;
+            this.domElement.addClass("show");
+            if (d.attrs) {
+                for (var i = 0; i < d.attrs.length; i++) {
+                    var floater = new DataFloater();
+                    floater.addTo(this);
+                    floater.bindData(d.attrs[i][0], d.attrs[i][1]);
+                    floater.show();
+                    this.floaters.push(floater);
+                }
+            }
+            this._implode_pending = false;
+        }
+    }
+    in(d) {
+        if (this.isVisible) {
+            return;
+        }
+        this.data = d;
+        this._implode_pending = true;
+        this.isVisible = true;
+        while (this.floaters.length) {
+            this.floaters.pop().destroy();
+        }
+
+    }
+    out() {
+        if (!this.isVisible) return;
+        this.isVisible = false;
+        this._implode_pending = false;
+        this.domElement.removeClass("show");
+        for (var i = 0; i < this.floaters.length; i++) {
+            this.floaters[i].hide();
+        }
+    }
 }

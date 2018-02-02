@@ -23,6 +23,9 @@ DOMContainer.add(numbers);
 var bgCanvas = new GUI.AvatarWall();
 DOMContainer.add(bgCanvas);
 
+var blocks = new GUI.DataFloaterManager();
+DOMContainer.add(blocks);
+
 DOMContainer.add(ParticleBG.WeiboList);
 
 
@@ -32,6 +35,8 @@ Scene.managed.push(title);
 Scene.managed.push(subtitle);
 Scene.managed.push(numbers);
 Scene.managed.push(ParticleBG);
+Scene.managed.push(ParticleBG.WeiboList);
+Scene.managed.push(blocks);
 Scene.managed.push(bgCanvas);
 
 window.scene = Scene;
