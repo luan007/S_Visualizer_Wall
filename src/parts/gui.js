@@ -460,3 +460,44 @@ export class AvatarWall extends DOMRenderable {
         }
     }
 }
+
+export class Explainer extends DOMRenderable {
+    constructor(_render) {
+        super(_render);
+        this.isVisible = false;
+        this.domElement = $(`
+            <div class="explainer animate-block">
+                <div class="wrapper">
+                    <div class="edge-tri"></div>
+                    <div class='subtitle'>事件简介 / INTRODUCTION</div>
+                    <span class='typer'></span>
+                </div>
+            </div>
+        `);
+        this.dom_subtitle = $(this.domElement.find(".scaler")[0]);
+        this.dom_at = $(this.domElement.find(".at")[0]);
+        this.dom_content = $(this.domElement.find(".content")[0]);
+        this.dom_avatar = $(this.domElement.find(".avatar-image")[0]);
+    }
+    show(x, y, url) {
+        this.dom_avatar.attr("src", url);
+        this.domElement.css("transform", `translate(${px(x)}, ${px(y)})`);
+        if (this.prev[0] !== x || this.prev[1] !== y) {
+            this.domElement.removeClass("show");
+            this.prev[0] = x;
+            this.prev[1] = y;
+            this.isVisible = false;
+            return;
+        }
+        if (!this.isVisible) {
+            this.isVisible = true;
+            this.domElement.addClass("show");
+        }
+    }
+    hide() {
+        if (this.isVisible) {
+            this.isVisible = false;
+            this.domElement.removeClass("show");
+        }
+    }
+}
